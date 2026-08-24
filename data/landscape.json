@@ -2,7 +2,7 @@
   "schema": 1,
   "name": "AI Landscape",
   "description": "Interactive map of the AI tooling landscape: categories as systems, players in orbit.",
-  "updated": "2026-08-24T15:29:02Z",
+  "updated": "2026-08-24T19:19:40Z",
   "categories": [
     {
       "id": "foundation-models",
@@ -4420,9 +4420,9 @@
           ],
           "prominence": 2,
           "report": {
-            "status": "none",
-            "path": null,
-            "updated": null
+            "status": "ready",
+            "path": "reports/pi.html",
+            "updated": "2026-08-24T19:19:40Z"
           }
         },
         {

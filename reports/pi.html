@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pi — Deep-Research Report · 2026-08-24</title>
+<style>
+  :root{
+    --bg:#101423; --card:#161b2e; --card2:#1a1f33;
+    --ink:#e8eaf2; --muted:#9aa0b5; --line:#262b3d; --link:#7fb3f5;
+    /* category color for Model Harnesses and Orchestration is #766806 (olive/gold);
+       lightened here to a legible gold for dark-mode text/borders */
+    --accent:#c7b23a; --accent-soft:rgba(199,178,58,.14);
+    --good:#0ca30c; --warn:#fab219; --bad:#d03b3b;
+    --font:Futura,"Century Gothic","Jost",system-ui,-apple-system,"Segoe UI",sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--font);font-weight:400;
+    line-height:1.55;letter-spacing:.1px;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:940px;margin:0 auto;padding:34px 26px 60px}
+  a{color:var(--link);text-decoration:none;border-bottom:1px solid rgba(127,179,245,.3)}
+  a:hover{border-bottom-color:var(--link)}
+  a:focus-visible,summary:focus-visible{outline:2px solid var(--link);outline-offset:3px;border-radius:4px}
+  h1,h2,h3{font-weight:600;letter-spacing:.4px}
+  p{margin:0 0 14px} strong,b{color:#fff;font-weight:600}
+  header{border-bottom:2px solid var(--accent);padding-bottom:18px;margin-bottom:26px}
+  .kicker{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--accent);font-weight:600}
+  h1{font-size:32px;line-height:1.08;margin:8px 0 10px;color:#fff}
+  .subline{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;font-size:13px;color:var(--muted)}
+  .pill{display:inline-flex;align-items:center;gap:7px;font-size:11px;letter-spacing:1px;text-transform:uppercase;
+    padding:4px 11px;border-radius:20px;font-weight:600;border:1px solid var(--line);color:var(--ink)}
+  .pill .dot{width:8px;height:8px;border-radius:50%;background:var(--accent)}
+  .pill.oss{background:rgba(12,163,12,.13);border-color:rgba(12,163,12,.4);color:#8fd68f}
+  section{margin:34px 0}
+  .sec-head{display:flex;align-items:baseline;gap:12px;margin-bottom:14px;border-left:4px solid var(--accent);padding-left:13px}
+  .sec-head h2{font-size:19px;color:#fff}
+  .sec-head .n{font-size:12px;color:var(--accent);font-weight:700;letter-spacing:2px}
+  .lead{font-size:14px;color:var(--muted);max-width:80ch;margin:-4px 0 15px 17px}
+  h3{font-size:15px;margin:22px 0 6px;color:var(--ink)}
+  .callout{background:var(--accent-soft);border:1px solid var(--line);border-left:3px solid var(--accent);
+    border-radius:12px;padding:15px 18px;margin:2px 0 6px;font-size:15px}
+  .tag{display:inline-block;font-size:9.5px;font-weight:700;letter-spacing:1.1px;text-transform:uppercase;
+    padding:1px 6px;border-radius:5px;vertical-align:middle;margin-right:6px;border:1px solid var(--line);color:var(--muted)}
+  .tag.f{border-color:rgba(12,163,12,.5);color:#7fce7f}
+  .tag.i{border-color:rgba(199,178,58,.55);color:#e0cf7c}
+  .grid{display:grid;gap:13px;margin:6px 0 4px}
+  .g4{grid-template-columns:repeat(4,1fr)} .g3{grid-template-columns:repeat(3,1fr)} .g2{grid-template-columns:repeat(2,1fr)}
+  .tile{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:15px 15px 14px;position:relative;overflow:hidden}
+  .tile .tick{position:absolute;top:0;left:0;height:100%;width:4px;background:var(--accent)}
+  .tile .big{font-size:24px;font-weight:700;color:#fff;line-height:1.05}
+  .tile .big span{font-size:14px;color:var(--muted);font-weight:600}
+  .tile .lbl{font-size:12.5px;color:var(--ink);font-weight:600;margin-top:7px}
+  .tile .sub{font-size:11.5px;color:var(--muted);margin-top:5px;line-height:1.4}
+  figure{margin:14px 0 18px}
+  figcaption{font-size:12px;color:var(--muted);margin-top:9px;padding-left:2px}
+  .flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:8px}
+  .node{flex:1 1 140px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 12px;min-width:128px}
+  .node .nl{font-size:10px;letter-spacing:1.4px;text-transform:uppercase;color:var(--accent);font-weight:700}
+  .node .nt{font-size:13px;color:var(--ink);margin-top:4px;font-weight:600}
+  .node .nx{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.4}
+  .arrow{align-self:center;color:var(--accent);font-size:17px;font-weight:700;padding:0 1px}
+  .ba{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+  .pane{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 15px}
+  .pane.after{border-color:rgba(199,178,58,.45)}
+  .pane .ph{font-size:10.5px;letter-spacing:1.4px;text-transform:uppercase;font-weight:700;margin-bottom:8px;color:var(--muted)}
+  .pane.after .ph{color:var(--accent)}
+  .pane ul{list-style:none;font-size:13px}
+  .pane li{padding:5px 0 5px 16px;position:relative;color:var(--ink)}
+  .pane li::before{content:"—";position:absolute;left:0;color:var(--muted)}
+  ul.clean{list-style:none;margin:2px 0 10px}
+  ul.clean li{padding:9px 0;border-bottom:1px solid var(--line);font-size:14.5px}
+  ul.clean li:last-child{border-bottom:none}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin:4px 0 6px}
+  th,td{text-align:left;padding:9px 11px;border-bottom:1px solid var(--line);vertical-align:top}
+  thead th{color:var(--ink);font-size:11px;letter-spacing:1px;text-transform:uppercase;font-weight:600;
+    background:var(--accent-soft);border-bottom:1px solid var(--accent)}
+  td.date{white-space:nowrap;color:var(--accent);font-weight:600;font-variant-numeric:tabular-nums}
+  .rel{font-weight:700;font-size:11px;letter-spacing:.5px;white-space:nowrap}
+  .rel.hi{color:var(--good)} .rel.md{color:var(--accent)} .rel.lo{color:var(--bad)}
+  .badge{display:inline-block;font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;
+    padding:2px 8px;border-radius:6px;vertical-align:middle}
+  .b-new{background:var(--good);color:#fff} .b-chg{background:var(--warn);color:#20160a}
+  .b-rum{background:transparent;color:var(--muted);border:1px solid var(--line)}
+  .note{background:var(--card2);border:1px dashed var(--line);border-radius:10px;padding:12px 15px;
+    font-size:13px;color:var(--muted);margin-top:12px}
+  code{background:var(--card2);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:12.5px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#d7dcf0;letter-spacing:0}
+  pre{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:13px 15px;overflow-x:auto;
+    white-space:pre;margin:8px 0 4px}
+  pre code{background:none;border:none;padding:0;font-size:12.5px;line-height:1.5;color:#d7dcf0}
+  details{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 15px;margin:4px 0 14px}
+  summary{cursor:pointer;font-size:13.5px;color:var(--accent);font-weight:600;letter-spacing:.3px}
+  details p{margin:10px 0 0;font-size:14px}
+  .q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 17px;margin:0 0 13px}
+  .qq{font-size:14.5px;color:#fff;font-weight:600;margin:0 0 11px}
+  .qn{color:var(--accent);font-weight:700;letter-spacing:1.5px;font-size:11px;margin-right:8px}
+  .opt-in{position:absolute;width:1px;height:1px;opacity:0}
+  .opt{display:block;border:1px solid var(--line);border-radius:9px;padding:9px 12px;margin:0 0 7px;
+    font-size:13.5px;cursor:pointer;background:var(--bg);color:var(--ink)}
+  .opt:hover{border-color:var(--muted)}
+  .opt-in:focus-visible + .opt{outline:2px solid var(--link);outline-offset:2px}
+  .opt-in:checked + .opt{border-color:var(--accent);background:var(--accent-soft)}
+  .fb{display:none;font-size:13px;border-radius:9px;padding:10px 12px;margin:-2px 0 9px;line-height:1.5}
+  .opt-in:checked + .opt + .fb{display:block}
+  .fb .vk{font-weight:700;letter-spacing:.6px;margin-right:6px}
+  .fb.ok{background:rgba(12,163,12,.12);border:1px solid rgba(12,163,12,.45);color:#cfe9cf}
+  .fb.ok .vk{color:#7fce7f}
+  .fb.no{background:rgba(250,178,25,.10);border:1px solid rgba(250,178,25,.4);color:#ecdcc0}
+  .fb.no .vk{color:#f6d089}
+  footer{margin-top:44px;border-top:2px solid var(--accent);padding-top:14px;font-size:11.5px;color:var(--muted);
+    display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  @media(max-width:820px){.g4,.g3{grid-template-columns:repeat(2,1fr)}.g2,.ba{grid-template-columns:1fr}
+    .wrap{padding:24px 16px 48px}h1{font-size:27px}.arrow{transform:rotate(90deg)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="kicker">AI Landscape · Deep-Research Report</div>
+    <h1>Pi</h1>
+    <div class="subline">
+      <span>Hackable BYOK coding-agent harness</span>
+      <span class="pill"><span class="dot"></span>Model Harnesses and Orchestration</span>
+      <span class="pill oss">MIT · Open source</span>
+      <span>Report generated 2026-08-24</span>
+    </div>
+  </header>
+
+  <!-- 01 -->
+  <section>
+    <div class="sec-head"><span class="n">01</span><h2>TL;DR</h2></div>
+    <div class="callout">
+      Pi is a deliberately <b>minimal, terminal-native coding-agent harness</b> from Mario
+      Zechner (creator of the libGDX game framework), now developed at <b>Earendil Inc.</b> —
+      the Vienna public-benefit corporation co-founded by Flask's Armin Ronacher — and shipped
+      under the MIT license. Where Claude Code and Codex are batteries-included, Pi ships four
+      built-in tools (<code>read</code>, <code>write</code>, <code>edit</code>, <code>bash</code>)
+      and a system prompt under ~2,000 tokens, pushing everything else into a TypeScript
+      extension system you assemble yourself. It is provider-agnostic and <b>bring-your-own-key</b>:
+      the same loop runs on Claude, GPT, Gemini, Grok, or local models. Its thesis — that less
+      scaffolding means less hidden context, lower cost, and more predictable behavior — got
+      outside support in August 2026, when a <b>Databricks</b> benchmark found Pi topping pass
+      rates on Claude Opus 4.8 while sending roughly 3× less context and costing over 2× less
+      per task than heavier harnesses. The bill for that minimalism: a steep on-ramp and
+      <b>no safety rails by default</b> — sandboxing and permissions are your responsibility.
+    </div>
+  </section>
+
+  <!-- 02 -->
+  <section>
+    <div class="sec-head"><span class="n">02</span><h2>What it is</h2></div>
+
+    <details>
+      <summary>New to the idea of an agent "harness"? Start here (skippable)</summary>
+      <p>
+        A large language model on its own only produces text. To make it <em>do</em> things —
+        read your files, run commands, edit code — something has to wrap it in a loop: send the
+        model a prompt, let it request a tool, run that tool, feed the result back, and repeat
+        until the task is done. That wrapper is the <b>harness</b>. Every coding agent has one;
+        usually it's hidden inside a product. Pi's whole argument is that the harness should be
+        small, visible, and yours to change — because everything the harness adds (extra tools,
+        hidden instructions, automatic context trimming) is also something the model has to pay
+        attention to and pay tokens for.
+      </p>
+    </details>
+
+    <p>
+      <span class="tag f">Fact</span>Pi is the harness, not the model. It ships with exactly four
+      tools — read, write, edit, and bash — and a small core loop. Everything beyond that is a
+      plug-in: <b>TypeScript extensions</b>, lazy-loaded <b>skills</b>, prompt templates, themes,
+      and shareable packages let you rebuild the agent around your own workflow. It runs as a
+      terminal UI with persistent, forkable <b>session trees</b> and several runtime modes, and
+      it speaks to 15+ model providers through one unified API, using <b>your</b> keys.
+    </p>
+    <p>
+      <span class="tag i">Reading</span>Just as telling is what Pi leaves out. It deliberately
+      omits MCP, sub-agents, and background bash from the core. Zechner's argument, echoed by
+      Ronacher, is that heavyweight harnesses "hide context and shift behavior between releases"
+      — so the same prompt silently does different things month to month. Trade press framed Pi
+      as a <em>"harness rebellion"</em> rather than a Claude Code clone.
+    </p>
+
+    <figure>
+      <div class="ba">
+        <div class="pane">
+          <div class="ph">Batteries-included harness</div>
+          <ul>
+            <li>Large system prompt (reported ~22K tokens)</li>
+            <li>MCP, sub-agents, background tasks baked in</li>
+            <li>Context compacted <em>for</em> you, out of view</li>
+            <li>Behavior can shift release to release</li>
+            <li>Tied to one lab's model or subscription</li>
+          </ul>
+        </div>
+        <div class="pane after">
+          <div class="ph">Pi's approach</div>
+          <ul>
+            <li>System prompt + tools under ~2K tokens</li>
+            <li>Four tools; everything else you add</li>
+            <li>Context stays visible and under your control</li>
+            <li>Small stable core; you own the changes</li>
+            <li>Any provider, your own API keys (BYOK)</li>
+          </ul>
+        </div>
+      </div>
+      <figcaption><b>Figure 1.</b> Pi's design bet is subtractive. The heavyweight column isn't wrong — it's convenient — but each convenience spends context and can move under you. Pi trades that convenience for a small, legible surface you control.</figcaption>
+    </figure>
+  </section>
+
+  <!-- 03 -->
+  <section>
+    <div class="sec-head"><span class="n">03</span><h2>Product &amp; technology</h2></div>
+    <p class="lead">The mental model first: a tiny, transparent loop between one model and four tools — with a plug-in slot for anything you want to add.</p>
+
+    <p>
+      You point Pi at a model (via your key) and talk to it in the terminal. Each turn the model
+      may call one of the four tools; Pi runs it, appends the result, and loops. Because the core
+      prompt is small, most of the context window stays available for <em>your</em> code and the
+      task at hand rather than the harness's own machinery.
+    </p>
+
+    <pre><code>you:  "add a --json flag to the export command and cover it with a test"
+      -> model reads the relevant files            (read)
+      -> proposes an edit to the CLI + a new test  (edit / write)
+      -> runs the suite                            (bash)
+      -> reads failures, revises, re-runs          (read -> edit -> bash)
+      -> stops when green; you saw every step and every token</code></pre>
+
+    <figure>
+      <div class="flow">
+        <div class="node"><div class="nl">Ask</div><div class="nt">Terminal prompt</div><div class="nx">plain-language task</div></div>
+        <span class="arrow">&rarr;</span>
+        <div class="node"><div class="nl">Model</div><div class="nt">Any provider (BYOK)</div><div class="nx">Claude · GPT · Gemini · Grok · local</div></div>
+        <span class="arrow">&rarr;</span>
+        <div class="node"><div class="nl">Core tools</div><div class="nt">read · write · edit · bash</div><div class="nx">the entire built-in surface</div></div>
+        <span class="arrow">&rarr;</span>
+        <div class="node"><div class="nl">Extend</div><div class="nt">Skills &amp; extensions</div><div class="nx">lazy-loaded TypeScript, only if you add it</div></div>
+        <span class="arrow">&rarr;</span>
+        <div class="node"><div class="nl">Result</div><div class="nt">Edits + visible trace</div><div class="nx">context stays in view; loop repeats</div></div>
+      </div>
+      <figcaption><b>Figure 2.</b> One turn of the Pi loop. The distinguishing choices are the narrow <em>Core tools</em> box (four, not dozens) and that <em>Extend</em> is opt-in and lazy — a skill's tokens only enter the prompt when it's actually invoked.</figcaption>
+    </figure>
+
+    <h3>Minimal context as the core feature</h3>
+    <p>
+      <span class="tag f">Fact</span>Pi's system prompt and tool definitions occupy well under
+      2,000 tokens; one comparison put a heavier harness's system prompt near 22,000. On a small
+      context window that overhead crowds out real work even when cached. Skills load lazily, so
+      the prompt only grows when a capability is actually used.
+    </p>
+
+    <h3>Extensibility over features</h3>
+    <p>
+      <span class="tag f">Fact</span>Rather than ship features, Pi ships a way to add them.
+      TypeScript extensions can add tools, reshape context handling, add permission logic, or
+      wire in sub-agent patterns; skills and prompt templates package reusable behavior; packages
+      let teams share setups. The corollary is that a capable Pi setup is something you build and
+      maintain — the tool hands you the parts, not the assembly.
+    </p>
+
+    <h3>Provider-agnostic by design</h3>
+    <p>
+      <span class="tag f">Fact</span>One CLI runs the same agent loop against 15+ providers with
+      your own keys, so switching models is a config change, not a new tool. That independence is
+      why Pi reads as infrastructure: the harness is the constant, the model is swappable.
+    </p>
+  </section>
+
+  <!-- 04 -->
+  <section>
+    <div class="sec-head"><span class="n">04</span><h2>Market position</h2></div>
+    <p class="lead">Pi competes on what it removes. Some category siblings are built on top of it.</p>
+
+    <p>
+      Within <b>Model Harnesses and Orchestration</b>, Pi's closest kin are the other
+      model-agnostic runtimes — <b>OpenClaw</b>, <b>Hermes Agent</b>, <b>DeepSeek Harness</b>,
+      <b>Goose</b>, <b>OpenHands</b>, and the research harness <b>SWE-agent</b> — while the
+      orchestration layer (<b>Conductor</b>, <b>Orca</b>, <b>Claude Squad</b>, <b>Paperclip</b>)
+      sits above and drives harnesses like it. Notably, OpenClaw <em>embeds Pi's SDK</em>: Pi is
+      less a rival to the viral consumer harness than the substrate under it. Its sharpest
+      contrast is with the batteries-included flagships in <b>Coding Agents</b> — Claude Code and
+      Codex — which are themselves harnesses but bundle far more scaffolding.
+    </p>
+
+    <figure>
+      <table>
+        <thead><tr><th>Dimension</th><th>Pi</th><th>Batteries-included (Claude Code / Codex)</th></tr></thead>
+        <tbody>
+          <tr><td>Built-in tools</td><td>Four (read/write/edit/bash)</td><td>Many, plus MCP, sub-agents, background tasks</td></tr>
+          <tr><td>System-prompt overhead</td><td>Under ~2K tokens</td><td>Reported ~22K tokens for one harness</td></tr>
+          <tr><td>Model</td><td>Any provider, your keys (BYOK)</td><td>Primarily the vendor's own models</td></tr>
+          <tr><td>Extending it</td><td>Write a TypeScript extension</td><td>Use built-in features / configured plugins</td></tr>
+          <tr><td>Safety rails</td><td>None by default — you sandbox</td><td>Approval prompts / guardrails included</td></tr>
+        </tbody>
+      </table>
+      <figcaption><b>Figure 3.</b> The comparison that matters isn't "which writes better code" — on the same model that converges — but how much the harness itself costs and hides. Pi optimizes the harness; the flagships optimize the out-of-box experience.</figcaption>
+    </figure>
+
+    <p>
+      <span class="tag i">Reading</span>The differentiation crystallized around a single
+      third-party result. In August 2026 Databricks benchmarked coding harnesses on its own
+      multi-million-line codebase and reported that the harness — not just the model — drives
+      cost and quality:
+    </p>
+    <div class="grid g4">
+      <div class="tile"><span class="tick"></span><div class="big">~90%</div><div class="lbl">Pass rate, Opus 4.8</div><div class="sub">Pi (xhigh) edged the same model run through Claude Code (max) on Databricks' benchmark.</div></div>
+      <div class="tile"><span class="tick"></span><div class="big">~3&times;</div><div class="lbl">Less context / turn</div><div class="sub">Tighter working set than Claude Code and Codex; finishes in fewer runs.</div></div>
+      <div class="tile"><span class="tick"></span><div class="big">&gt;2&times;</div><div class="lbl">Lower cost / task</div><div class="sub">Same model, same thinking effort, similar quality — different harness.</div></div>
+      <div class="tile"><span class="tick"></span><div class="big">~62K</div><div class="lbl">GitHub stars</div><div class="sub">By mid-2026 (from badlogic/pi-mono, now earendil-works/pi).</div></div>
+    </div>
+    <p class="note">
+      <span class="tag i">Reading</span> Treat the benchmark as directional, not settled: it runs
+      on one company's codebase and specific models, and Databricks has its own stake in
+      cost-efficient inference. The robust takeaway is the general one it names — <em>the harness
+      is a cost lever</em> — more than any single percentage.
+    </p>
+  </section>
+
+  <!-- 05 -->
+  <section>
+    <div class="sec-head"><span class="n">05</span><h2>Business</h2></div>
+    <p>
+      Pi began as Mario Zechner's personal project and is now a product of <b>Earendil Inc.</b>,
+      a venture-backed <b>public-benefit corporation</b> based in Vienna, co-founded in 2025 by
+      Armin Ronacher (creator of Flask and Sentry) and Colin Daymond Hanna. On April 8, 2026,
+      Zechner joined Earendil and brought Pi with him; the repository moved from
+      <code>badlogic/pi-mono</code> to <code>earendil-works/pi</code>, the core stayed MIT, and
+      Earendil began building a hosted platform around it.
+    </p>
+    <div class="grid g4">
+      <div class="tile"><span class="tick"></span><div class="big">$0 <span>core</span></div><div class="lbl">Price of Pi</div><div class="sub">MIT-licensed CLI; no seats or license fees. You pay only the model API you connect.</div></div>
+      <div class="tile"><span class="tick"></span><div class="big">MIT</div><div class="lbl">License (core)</div><div class="sub">Open source; licensing terms discussed openly in Earendil RFC 0015.</div></div>
+      <div class="tile"><span class="tick"></span><div class="big">2025</div><div class="lbl">Earendil founded</div><div class="sub">Vienna PBC; Ronacher + Hanna. Pi joined Apr 8, 2026.</div></div>
+      <div class="tile"><span class="tick"></span><div class="big">VC <span>est.</span></div><div class="lbl">Funding</div><div class="sub">"Venture-backed"; specific round size and investors not disclosed in public sources.</div></div>
+    </div>
+    <h3>How the money works</h3>
+    <p>
+      <span class="tag f">Fact</span>The open-source CLI is free; costs come only from whichever
+      model provider you bring your key for. <span class="tag i">Reading</span>Earendil's business
+      is the layer around Pi — a hosted/cloud platform (announced alongside Pi) rather than the
+      CLI itself. That's the familiar open-core shape: give away the client that becomes
+      developers' default, monetize the managed service and team features on top. The thing to
+      watch is exactly that boundary — what stays MIT versus what becomes paid — which is why the
+      public licensing RFC is worth tracking.
+    </p>
+  </section>
+
+  <!-- 06 -->
+  <section>
+    <div class="sec-head"><span class="n">06</span><h2>Recent developments</h2></div>
+    <table>
+      <thead><tr><th>Date</th><th>Development</th></tr></thead>
+      <tbody>
+        <tr><td class="date">Aug 2025</td><td>Pi first released as Mario Zechner's open-source project (<code>badlogic/pi-mono</code>) — four tools, TypeScript extensions, radical minimalism.</td></tr>
+        <tr><td class="date">Jan 2026</td><td>Armin Ronacher publicly endorses Pi, raising its profile among developers.</td></tr>
+        <tr><td class="date">Apr 8, 2026</td><td>Zechner joins Earendil; Pi becomes an Earendil product; repo moves to <code>earendil-works/pi</code>; a cloud platform is announced. <span class="badge b-chg">&Delta; Ownership</span></td></tr>
+        <tr><td class="date">May 24, 2026</td><td>Ronacher publishes "Building Pi with Pi," detailing the open-source core and its development.</td></tr>
+        <tr><td class="date">Jun 2026</td><td>Repo passes ~62K GitHub stars; analyses weigh its token-efficiency against its steep on-ramp and missing safety rails.</td></tr>
+        <tr><td class="date">Aug 2026</td><td>Databricks benchmark validates the minimalism thesis: on Opus 4.8, Pi tops pass rate at ~3&times; less context and lower cost than heavier harnesses. <span class="badge b-new">New</span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 07 -->
+  <section>
+    <div class="sec-head"><span class="n">07</span><h2>Risks &amp; limitations</h2></div>
+    <p class="lead">Where Pi is genuinely demanding, exposed, or unresolved — stated plainly.</p>
+    <ul class="clean">
+      <li><b>Steep on-ramp, terminal only.</b> Pi assumes fluency with the command line, git, tmux, and containers, and has no GUI. That deliberately excludes non-technical builders and rapid-prototyping teams who are exactly the audience batteries-included tools court.</li>
+      <li><b>No safety rails by default — and this is by design.</b> The core has no permission system to restrict filesystem, process, network, or credential access; it runs with the permissions of the user who launched it, with no per-command approval prompts. Sandboxing is your job, not the tool's, which raises the stakes of a bad <code>bash</code> call.</li>
+      <li><b>Minimalism moves work onto you.</b> A capable setup is assembled from extensions and skills you write and maintain. The four-tool core is honest about this, but it means Pi's real cost includes the engineering time to make it comfortable.</li>
+      <li><b>Deliberate omissions cut both ways.</b> No MCP, sub-agents, or background bash in core is a feature to purists and a gap to teams who want those out of the box. You can add them via extensions, but that is again work you own.</li>
+      <li><b>The flattering benchmark is vendor-adjacent.</b> The strongest efficiency claims come from Databricks' own codebase and Earendil's framing of it. The directional point (harness overhead is real) is sturdier than any single pass-rate number, which may not transfer to your stack.</li>
+      <li><b>Governance and licensing are now company-steered.</b> Pi is an asset of a venture-backed company. The core is MIT today, but roadmap and licensing decisions sit with Earendil and are being worked out in the open (RFC 0015) — an open-core boundary that can move.</li>
+    </ul>
+    <div class="note">
+      <b>Bottom line for an engineering-literate researcher or team:</b> reach for Pi when you
+      want a transparent, low-overhead, model-agnostic loop you fully control — and when you're
+      willing to own sandboxing and setup. If you need guardrails, a GUI, or "it just works"
+      defaults, a batteries-included agent is the safer default. The failure mode to plan for
+      isn't weak output; it's an unsandboxed command running with your full permissions.
+    </div>
+  </section>
+
+  <!-- 08 -->
+  <section>
+    <div class="sec-head"><span class="n">08</span><h2>Check your understanding</h2></div>
+    <p class="lead">Five questions on behavior and trade-offs. Select an option to see whether it's right and why.</p>
+
+    <div class="q">
+      <p class="qq"><span class="qn">Q1</span> Two developers run Pi on the exact same task, one with Claude Opus 4.8 and one with a local model. Where does the difference in code quality mainly come from?</p>
+      <input type="radio" name="q1" id="q1a" class="opt-in"><label for="q1a" class="opt">From Pi itself, which tunes its output to the task before calling any model.</label>
+      <div class="fb no"><span class="vk">Not quite —</span> Pi is the harness, not a model. It runs the loop and the four tools; it doesn't generate or improve the code independently of the model you plug in.</div>
+      <input type="radio" name="q1" id="q1b" class="opt-in"><label for="q1b" class="opt">From the model each one connected — Pi is model-agnostic, so quality tracks the LLM.</label>
+      <div class="fb ok"><span class="vk">Correct —</span> Pi supplies the loop and tools; the reasoning is the model's. Same harness, different model, different results — which is also why "BYOK" is central to how Pi is described.</div>
+      <input type="radio" name="q1" id="q1c" class="opt-in"><label for="q1c" class="opt">From the four built-in tools, which do the actual reasoning about the change.</label>
+      <div class="fb no"><span class="vk">Not quite —</span> read, write, edit, and bash are mechanical actions the model chooses to call. They execute; they don't reason.</div>
+      <input type="radio" name="q1" id="q1d" class="opt-in"><label for="q1d" class="opt">From Pi's TypeScript extensions, which rewrite the model's answers post-hoc.</label>
+      <div class="fb no"><span class="vk">Not quite —</span> extensions add tools and behavior you opt into; they aren't a hidden output-rewriting layer, and none run unless you install them.</div>
+    </div>
+
+    <div class="q">
+      <p class="qq"><span class="qn">Q2</span> On Databricks' benchmark, the same model cost over 2&times; less per task through Pi than through a heavier harness. What best explains that?</p>
+      <input type="radio" name="q2" id="q2a" class="opt-in"><label for="q2a" class="opt">Pi sends far less context per turn, so each call is cheaper and tasks finish in fewer runs.</label>
+      <div class="fb ok"><span class="vk">Correct —</span> a sub-2K-token core (vs a reported ~22K) means less is paid for on every turn, and a tighter working set converges in fewer iterations. The harness overhead is the lever.</div>
+      <input type="radio" name="q2" id="q2b" class="opt-in"><label for="q2b" class="opt">Pi quietly routed the work to a cheaper model than the heavier harness used.</label>
+      <div class="fb no"><span class="vk">Not quite —</span> the comparison holds the model and thinking effort constant. The variable being tested is the harness, not the model.</div>
+      <input type="radio" name="q2" id="q2c" class="opt-in"><label for="q2c" class="opt">Pi ran more agents in parallel, spreading the cost across workers.</label>
+      <div class="fb no"><span class="vk">Not quite —</span> Pi's core has no sub-agents; parallelism isn't its mechanism. Its edge is spending fewer tokens, not more workers.</div>
+      <input type="radio" name="q2" id="q2d" class="opt-in"><label for="q2d" class="opt">Pi cached the whole codebase once, so later turns were nearly free.</label>
+      <div class="fb no"><span class="vk">Not quite —</span> even cached, a large system prompt still crowds a small context window. Pi's saving is keeping the prompt small in the first place.</div>
+    </div>
+
+    <div class="q">
+      <p class="qq"><span class="qn">Q3</span> A team wants every shell command to require approval and the agent boxed away from their credentials. What does stock Pi give them?</p>
+      <input type="radio" name="q3" id="q3a" class="opt-in"><label for="q3a" class="opt">A per-command approval prompt that's on by default for anything touching <code>bash</code>.</label>
+      <div class="fb no"><span class="vk">Not quite —</span> the core has no per-command approval prompts. That expectation comes from batteries-included agents, not Pi.</div>
+      <input type="radio" name="q3" id="q3b" class="opt-in"><label for="q3b" class="opt">A container sandbox that Pi spins up automatically around each session.</label>
+      <div class="fb no"><span class="vk">Not quite —</span> Pi doesn't sandbox itself; it runs in your environment. Isolation is something you set up around it.</div>
+      <input type="radio" name="q3" id="q3c" class="opt-in"><label for="q3c" class="opt">An MCP-based permission broker that mediates all file and network access.</label>
+      <div class="fb no"><span class="vk">Not quite —</span> Pi omits MCP from core, and there's no built-in permission broker. Access control isn't provided out of the box.</div>
+      <input type="radio" name="q3" id="q3d" class="opt-in"><label for="q3d" class="opt">Nothing by default — it runs with your permissions, so sandboxing is your responsibility.</label>
+      <div class="fb ok"><span class="vk">Correct —</span> Pi ships no permission system; it runs as the launching user with full access. You add approval logic via an extension or isolate it yourself — a deliberate trade for a small core.</div>
+    </div>
+
+    <div class="q">
+      <p class="qq"><span class="qn">Q4</span> Your workflow depends on MCP servers and sub-agents. How does Pi accommodate that?</p>
+      <input type="radio" name="q4" id="q4a" class="opt-in"><label for="q4a" class="opt">Both ship in the core and are enabled through a config flag.</label>
+      <div class="fb no"><span class="vk">Not quite —</span> the core deliberately leaves out MCP, sub-agents, and background bash. There's no flag that flips them on.</div>
+      <input type="radio" name="q4" id="q4b" class="opt-in"><label for="q4b" class="opt">Neither is possible with Pi; you'd need a different harness entirely.</label>
+      <div class="fb no"><span class="vk">Not quite —</span> that overstates it. Pi's whole point is that missing pieces are addable — just not pre-bundled.</div>
+      <input type="radio" name="q4" id="q4c" class="opt-in"><label for="q4c" class="opt">You add them yourself as TypeScript extensions; they're out of core by choice.</label>
+      <div class="fb ok"><span class="vk">Correct —</span> Pi keeps the core tiny and pushes capabilities like these into the extension system. You get them by writing/installing an extension, owning the surface you add.</div>
+      <input type="radio" name="q4" id="q4d" class="opt-in"><label for="q4d" class="opt">Pi auto-detects MCP servers on your machine and wires in sub-agents when load is high.</label>
+      <div class="fb no"><span class="vk">Not quite —</span> there's no auto-detection or dynamic sub-agent spawning. Nothing enters the loop unless you add it explicitly.</div>
+    </div>
+
+    <div class="q">
+      <p class="qq"><span class="qn">Q5</span> How should you think about Pi's relationship to OpenClaw, the viral consumer harness?</p>
+      <input type="radio" name="q5" id="q5a" class="opt-in"><label for="q5a" class="opt">They're unrelated competitors that happen to share the "harness" label.</label>
+      <div class="fb no"><span class="vk">Not quite —</span> they're more entangled than that. Treating them as unrelated misses that one is built on the other.</div>
+      <input type="radio" name="q5" id="q5b" class="opt-in"><label for="q5b" class="opt">OpenClaw is built on Pi's SDK — Pi is the substrate under the consumer product.</label>
+      <div class="fb ok"><span class="vk">Correct —</span> OpenClaw embeds Pi's SDK and adds channels and polish on top. So Pi's reach extends beyond its own CLI into tools that quietly run on it.</div>
+      <input type="radio" name="q5" id="q5c" class="opt-in"><label for="q5c" class="opt">Pi is a community fork of OpenClaw that stripped features out.</label>
+      <div class="fb no"><span class="vk">Not quite —</span> the dependency runs the other way, and the timeline is backwards: Pi predates and underlies OpenClaw rather than forking from it.</div>
+      <input type="radio" name="q5" id="q5d" class="opt-in"><label for="q5d" class="opt">OpenClaw replaced Pi after Earendil discontinued the CLI.</label>
+      <div class="fb no"><span class="vk">Not quite —</span> Pi is actively developed at Earendil and MIT-licensed; it wasn't discontinued or replaced.</div>
+    </div>
+  </section>
+
+  <!-- 09 -->
+  <section>
+    <div class="sec-head"><span class="n">09</span><h2>Sources &amp; reliability</h2></div>
+    <table>
+      <thead><tr><th>Source</th><th>Item</th><th>Reliability</th></tr></thead>
+      <tbody>
+        <tr><td><a href="https://pi.dev/">Pi — official docs (pi.dev)</a></td><td>Four tools, extensions/skills, sessions, BYOK, runtime modes — primary</td><td class="rel hi">High</td></tr>
+        <tr><td><a href="https://github.com/earendil-works/pi">GitHub — earendil-works/pi</a></td><td>Repo home, MIT license, move from badlogic/pi-mono, stars</td><td class="rel hi">High</td></tr>
+        <tr><td><a href="https://lucumr.pocoo.org/2026/4/8/mario-and-earendil/">Armin Ronacher — "Mario and Earendil"</a></td><td>Zechner joins Earendil; Pi becomes an Earendil product (Apr 8, 2026)</td><td class="rel hi">High</td></tr>
+        <tr><td><a href="https://lucumr.pocoo.org/2026/5/24/pi-oss/">Armin Ronacher — "Building Pi with Pi"</a></td><td>Open-source core; design philosophy (May 24, 2026)</td><td class="rel hi">High</td></tr>
+        <tr><td><a href="https://earendil.com/posts/announcing-pi-and-lefos/">Earendil — "Announcing Pi &amp; Lefos"</a></td><td>Company home; cloud platform around Pi</td><td class="rel hi">High</td></tr>
+        <tr><td><a href="https://www.databricks.com/blog/benchmarking-coding-agents-databricks-multi-million-line-codebase">Databricks — harness benchmark</a></td><td>Pass rate, ~3&times; less context, &gt;2&times; lower cost; "harness is the cost lever"</td><td class="rel md">Med</td></tr>
+        <tr><td><a href="https://earendil.com/posts/pi-autoresearch-and-databricks/">Earendil — "Pi, Minimal and Performant"</a></td><td>Vendor framing of the Databricks result</td><td class="rel md">Med</td></tr>
+        <tr><td><a href="https://www.implicator.ai/pi-is-not-a-claude-code-rival-it-is-a-harness-rebellion/">Implicator.ai</a></td><td>"Harness rebellion"; omits MCP/sub-agents/background bash intentionally</td><td class="rel md">Med</td></tr>
+        <tr><td><a href="https://academy.kspl.tech/blog/2026-06-05-pi-agent-deep-dive-2026">KSPL Academy (Jun 5, 2026)</a></td><td>Token-efficiency deep dive; limitations, no default safety rails</td><td class="rel md">Med</td></tr>
+        <tr><td><a href="https://rfc.earendil.com/0015/">Earendil RFC 0015 — Pi Licensing</a></td><td>Open licensing discussion (open-core boundary)</td><td class="rel hi">High</td></tr>
+        <tr><td><a href="https://explainx.ai/blog/pi-minimal-agent-harness-mario-zechner-guide-2026">explainX.ai</a></td><td>Zechner background (libGDX); tree sessions; four runtime modes</td><td class="rel lo">Low · secondary</td></tr>
+      </tbody>
+    </table>
+    <div class="note">
+      <b>Reliability key</b> — <b class="rel hi">High</b>: official Pi/Earendil sources and the
+      principals' own posts. <b class="rel md">Med</b>: reputable third-party benchmark, vendor
+      framing of it, and analysis pieces. <b class="rel lo">Low</b>: secondary write-ups.
+      All sources accessed <b>2026-08-24</b>. Quotations are brief and attributed; claims marked
+      <span class="tag i">Reading</span> are this report's interpretation, not the sources' words.
+      Note that the highest-reliability sources here are also the most self-interested (the
+      company and its founders), so efficiency claims are weighted as vendor-adjacent.
+    </div>
+  </section>
+
+  <footer>
+    <span>AI Landscape · Deep-Research Report · <b>Pi</b> · Model Harnesses and Orchestration</span>
+    <span>Generated 2026-08-24 · estimates flagged inline · primary source: Pi / Earendil</span>
+  </footer>
+
+</div>
+</body>
+</html>
