@@ -1,0 +1,1822 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Landscape</title>
+<style>
+/* ============================================================
+   Design tokens (BUILD_SPEC §5) — dark default + light variant
+   ============================================================ */
+:root{
+  --bg:#090c16;
+  --surface:#101423;
+  --surface-2:#161b2e;
+  --ink:#f2f4fa;
+  --ink-2:#a9aec2;
+  --muted:#7c8199;
+  --hairline:#262b3d;
+  --ring:rgba(255,255,255,.10);
+  --focus:#ffffff;
+  --link:#7fb3f5;
+  --status-good:#0ca30c;
+  --status-warn:#fab219;
+  --status-bad:#d03b3b;
+  --pill-bg:rgba(9,12,22,.66);
+  --backdrop:rgba(4,6,12,.55);
+  --shadow:0 14px 44px rgba(0,0,0,.55);
+  --star:#dfe4f5;
+  --rail:220px;         /* left vertical header rail width (0 on narrow → top bar) */
+  color-scheme:dark;
+}
+html[data-theme="light"]{
+  --bg:#eef0f6;
+  --surface:#ffffff;
+  --surface-2:#f5f6fb;
+  --ink:#151823;
+  --ink-2:#474d63;
+  --muted:#676d84;
+  --hairline:#d8dbe7;
+  --ring:rgba(12,16,34,.10);
+  --focus:#10131d;
+  --link:#2b62c9;
+  --pill-bg:rgba(255,255,255,.80);
+  --backdrop:rgba(24,29,48,.35);
+  --shadow:0 14px 44px rgba(24,29,48,.20);
+  --star:#3c4364;
+  --btn-ink:#ffffff;      /* --link is dark in light mode → white button text */
+  color-scheme:light;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{
+  background:var(--bg);color:var(--ink);
+  font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+a{color:var(--link)}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:4px}
+.tnum{font-variant-numeric:tabular-nums}
+
+/* ============================ Header ============================ */
+#hdr{
+  position:fixed;left:0;top:0;width:var(--rail);height:100vh;z-index:40;
+  display:flex;flex-direction:column;align-items:stretch;gap:14px;padding:16px 14px;
+  background:var(--surface);border-right:1px solid var(--hairline);
+}
+#hdr .brand{min-width:0}
+#hdr .brand h1{font-size:15px;font-weight:650;letter-spacing:.2px}
+#hdr .brand .sub{font-size:11px;color:var(--muted);margin-top:1px}
+#search-wrap{display:flex;position:relative}
+#search-box{position:relative;width:420px;max-width:100%}
+#search{
+  width:100%;height:34px;padding:0 34px 0 32px;border-radius:999px;
+  border:1px solid var(--hairline);background:var(--bg);color:var(--ink);
+  font-size:13px;outline-offset:1px;
+}
+#search::placeholder{color:var(--muted)}
+#search-box .mag{position:absolute;left:11px;top:9px;width:15px;height:15px;color:var(--muted);pointer-events:none}
+#search-box .slash{
+  position:absolute;right:10px;top:7px;font-size:11px;color:var(--muted);
+  border:1px solid var(--hairline);border-radius:5px;padding:1px 6px;pointer-events:none;background:var(--surface);
+}
+#search-list{
+  position:absolute;top:40px;left:0;width:100%;max-height:60vh;overflow:auto;
+  background:var(--surface-2);border:1px solid var(--hairline);border-radius:12px;
+  box-shadow:var(--shadow);padding:6px;display:none;z-index:60;
+}
+/* top-center chrome group over the stage: search + ⓘ + theme */
+#chrome-top{
+  position:fixed;top:12px;left:var(--rail);right:0;z-index:41;
+  display:flex;justify-content:center;align-items:center;gap:10px;
+  padding:0 16px;pointer-events:none;   /* transparent gutters stay click-through to the canvas */
+}
+#chrome-top > *{pointer-events:auto}
+#chrome-top #search{background:var(--surface)}   /* legible over the starfield */
+#chrome-top #about-btn,#chrome-top #theme-btn{background:var(--surface)}
+#search-list.open{display:block}
+#search-list .grp{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;padding:7px 10px 3px}
+#search-list .opt{
+  display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;
+  cursor:pointer;font-size:13px;
+}
+#search-list .opt .dot{width:9px;height:9px;border-radius:50%;flex:none}
+#search-list .opt .nm{color:var(--ink)}
+#search-list .opt .ctx{color:var(--muted);font-size:12px;margin-left:auto;padding-left:12px;white-space:nowrap}
+#search-list .opt.sel,#search-list .opt:hover{background:var(--ring)}
+#hdr .right{display:flex;align-items:center;gap:10px;position:relative;margin-top:auto}
+#stats{font-size:12.5px;color:var(--ink-2);line-height:1.7}
+#rep-btn{color:var(--link);border-radius:6px;padding:2px 3px}
+#rep-btn:hover{text-decoration:underline}
+#rep-drop{
+  position:fixed;width:320px;max-width:calc(100vw - 24px);max-height:50vh;overflow:auto;
+  background:var(--surface-2);border:1px solid var(--hairline);border-radius:12px;
+  box-shadow:var(--shadow);padding:6px;display:none;z-index:60;
+}
+#rep-drop.open{display:block}
+#rep-drop .item{display:flex;align-items:center;gap:9px;width:100%;text-align:left;padding:8px 10px;border-radius:8px;font-size:13px}
+#rep-drop .item:hover{background:var(--ring)}
+#rep-drop .item .dot{width:9px;height:9px;border-radius:50%;flex:none}
+#rep-drop .item .when{margin-left:auto;color:var(--muted);font-size:11.5px;white-space:nowrap;padding-left:10px}
+#rep-drop .empty{padding:14px 12px;color:var(--muted);font-size:12.5px}
+#theme-btn{
+  width:32px;height:32px;border-radius:8px;border:1px solid var(--hairline);
+  display:flex;align-items:center;justify-content:center;color:var(--ink-2);
+}
+#theme-btn:hover{color:var(--ink);background:var(--ring)}
+#about-btn{
+  width:32px;height:32px;border-radius:8px;border:1px solid var(--hairline);
+  display:flex;align-items:center;justify-content:center;color:var(--ink-2);position:relative;
+}
+#about-btn:hover{color:var(--ink);background:var(--ring)}
+#about-btn .qdot{
+  position:absolute;top:-5px;right:-5px;min-width:15px;height:15px;padding:0 3px;border-radius:8px;
+  background:var(--status-warn);color:#20160a;font-size:9px;font-weight:700;line-height:1;
+  display:flex;align-items:center;justify-content:center;border:1.5px solid var(--surface);
+}
+/* zero-result "miss" note in the search dropdown */
+#search-list .miss{padding:9px 10px;font-size:12.5px;color:var(--muted);line-height:1.55}
+#search-list .miss b{color:var(--ink-2);font-weight:600}
+#search-list .miss .q{color:var(--ink)}
+#search-list .miss .rev{color:var(--link);cursor:pointer;white-space:nowrap;display:inline-block;margin-top:4px}
+#search-list .miss .rev:hover{text-decoration:underline}
+
+/* ============================ Stage ============================ */
+#stage-wrap{position:fixed;inset:0 0 0 var(--rail);overflow:hidden}
+#stars{position:absolute;inset:0;width:100%;height:100%}
+#stage{position:absolute;inset:0}
+#stage.dim{filter:brightness(.8)}
+.view{position:absolute;inset:0;transition:opacity .35s ease-in-out,transform .35s ease-in-out}
+.view svg{width:100%;height:100%;display:block}
+.view.z-from{opacity:0;transform:scale(.82)}
+.view.z-live{opacity:1;transform:scale(1)}
+.view.z-out-in{opacity:0;transform:scale(1.9)}   /* galaxy zooming into a sun */
+.view.z-out-back{opacity:0;transform:scale(.62)} /* orbit zooming back out */
+.view.z-from-back{opacity:0;transform:scale(1.6)}
+
+/* SVG nodes */
+g.hot{cursor:pointer}
+g.hot .scaler{transform-box:fill-box;transform-origin:center;transition:transform .18s ease}
+g.hot:hover .scaler,g.hot:focus-visible .scaler{transform:scale(1.15)}
+g.hot:focus{outline:none}
+g.hot .focus-ring{opacity:0;fill:none;stroke:var(--focus);stroke-width:2}
+g.hot:focus-visible .focus-ring{opacity:1}
+.lbl-pill{fill:var(--pill-bg);stroke:var(--ring);stroke-width:1}
+.lbl-name{fill:var(--ink);font-size:12.5px;font-weight:600}
+.lbl-name.sm{font-size:11.5px}
+.lbl-sub{fill:var(--muted);font-size:10.5px;font-weight:500}
+.orbit-ring{fill:none;stroke:var(--ring);stroke-width:1;stroke-dasharray:3 7}
+@keyframes pulse{0%,100%{opacity:.95}50%{opacity:.25}}
+.pulse{animation:pulse 1.7s ease-in-out infinite}
+@keyframes glowpop{0%{box-shadow:0 0 0 0 rgba(12,163,12,.55)}100%{box-shadow:0 0 0 14px rgba(12,163,12,0)}}
+.glow-in{animation:glowpop 1.1s ease-out 2}
+
+/* Breadcrumb + chevrons */
+#crumb{
+  position:absolute;top:14px;left:16px;z-index:5;display:flex;align-items:center;gap:7px;
+  background:var(--pill-bg);border:1px solid var(--ring);border-radius:999px;
+  padding:6px 14px;font-size:12.5px;backdrop-filter:blur(4px);
+}
+#crumb a{color:var(--link);text-decoration:none}
+#crumb a:hover{text-decoration:underline}
+#crumb .sep{color:var(--muted)}
+#crumb .cur{color:var(--ink);font-weight:600}
+.chev{
+  position:absolute;top:50%;transform:translateY(-50%);z-index:5;
+  width:36px;height:36px;border-radius:50%;border:1px solid var(--hairline);
+  background:var(--pill-bg);color:var(--ink-2);font-size:17px;line-height:1;
+  display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);
+}
+.chev:hover{color:var(--ink);background:var(--ring)}
+.chev.prev{left:14px}.chev.next{right:14px}
+
+/* ============================ Side panel ============================ */
+#panel{
+  position:fixed;top:0;right:0;bottom:0;width:400px;max-width:100vw;z-index:45;
+  background:var(--surface);border-left:1px solid var(--hairline);
+  transform:translateX(102%);transition:transform .28s ease;
+  display:flex;flex-direction:column;visibility:hidden;
+}
+#panel.open{transform:translateX(0);visibility:visible;box-shadow:var(--shadow)}
+#panel .p-head{display:flex;align-items:flex-start;gap:8px;padding:16px 16px 0}
+#panel .p-close{
+  margin-left:auto;width:30px;height:30px;border-radius:8px;color:var(--muted);
+  display:flex;align-items:center;justify-content:center;font-size:15px;flex:none;
+}
+#panel .p-close:hover{color:var(--ink);background:var(--ring)}
+#panel .p-body{padding:2px 20px 20px;overflow-y:auto;flex:1}
+.cat-chip{
+  display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--ink-2);
+  border:1px solid var(--hairline);border-radius:999px;padding:4px 11px;text-decoration:none;
+}
+.cat-chip:hover{background:var(--ring)}
+.cat-chip .dot{width:9px;height:9px;border-radius:50%}
+#panel h2{font-size:22px;font-weight:600;margin-top:12px;line-height:1.25}
+#panel .tagline{color:var(--ink-2);font-size:13.5px;margin-top:3px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.chip{font-size:11.5px;color:var(--ink-2);background:var(--surface-2);border:1px solid var(--hairline);border-radius:999px;padding:3px 10px}
+.chip.prom{color:var(--ink);font-weight:550}
+#panel .pls{font-size:16px;line-height:1.6;color:var(--ink);margin-top:16px}
+#panel .ext{display:inline-flex;align-items:center;gap:5px;margin-top:14px;font-size:13.5px}
+.report-block{
+  margin-top:18px;border:1px solid var(--hairline);border-radius:12px;
+  background:var(--surface-2);padding:14px;
+}
+.report-block .rb-line{font-size:13px;color:var(--muted);margin-bottom:10px}
+.badge{
+  display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ink);
+  border-radius:999px;padding:4px 12px;margin-bottom:10px;
+}
+.badge .b-dot{width:9px;height:9px;border-radius:50%}
+.badge.warn{background:rgba(250,178,25,.14);border:1px solid rgba(250,178,25,.35)}
+.badge.warn .b-dot{background:var(--status-warn)}
+.badge.good{background:rgba(12,163,12,.13);border:1px solid rgba(12,163,12,.35)}
+.badge.good .b-dot{background:var(--status-good)}
+.btn{
+  display:inline-flex;align-items:center;gap:7px;border-radius:8px;padding:8px 15px;
+  font-size:13.5px;font-weight:600;border:1px solid transparent;
+}
+.btn.primary{background:var(--link);color:var(--btn-ink,#0b0e18)}
+.btn.ghost{border-color:var(--hairline);color:var(--ink)}
+.btn.ghost:hover{background:var(--ring)}
+.btn+.btn{margin-left:8px}
+.rb-when{font-size:12px;color:var(--muted);margin:8px 0 10px}
+.foot-note{font-size:12px;color:var(--muted);margin-top:16px}
+@media (max-width:560px){#panel{width:100vw}}
+
+/* ============================ Modal ============================ */
+#modal-root{position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;padding:20px}
+#modal-root.open{display:flex}
+#modal-root .backdrop{position:absolute;inset:0;background:var(--backdrop)}
+.modal{
+  position:relative;width:100%;max-width:720px;background:var(--surface-2);
+  border:1px solid var(--hairline);border-radius:12px;box-shadow:var(--shadow);
+  padding:20px;max-height:calc(100vh - 60px);display:flex;flex-direction:column;
+}
+.modal h3{font-size:16px;font-weight:650;padding-right:36px}
+.modal .hint{font-size:12.5px;color:var(--ink-2);margin:7px 0 12px}
+.modal textarea{
+  width:100%;flex:1;min-height:120px;height:330px;resize:vertical;
+  background:var(--surface);color:var(--ink);border:1px solid var(--hairline);border-radius:8px;
+  font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;padding:12px;white-space:pre;
+}
+.modal .m-foot{display:flex;align-items:center;gap:10px;margin-top:13px}
+.modal .m-close{position:absolute;top:12px;right:12px;width:30px;height:30px;border-radius:8px;color:var(--muted);display:flex;align-items:center;justify-content:center}
+.modal .m-close:hover{color:var(--ink);background:var(--ring)}
+.modal .notice{font-size:13px;color:var(--ink-2);line-height:1.6;background:var(--surface);
+  border:1px solid var(--hairline);border-radius:10px;padding:13px 15px;margin:6px 0 4px}
+.modal .notice b{color:var(--ink)}
+.modal .m-sub{font-size:11px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin:16px 0 8px}
+.miss-list{max-height:220px;overflow:auto;border:1px solid var(--hairline);border-radius:10px}
+.miss-row{display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid var(--hairline);font-size:13px}
+.miss-row:last-child{border-bottom:none}
+.miss-row .mq{color:var(--ink);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.miss-row .mc{color:var(--muted);font-size:11.5px;flex:none}
+.miss-row .mwhen{margin-left:auto;color:var(--muted);font-size:11.5px;white-space:nowrap;flex:none}
+.miss-row .mx{flex:none;width:22px;height:22px;border-radius:6px;color:var(--muted);display:flex;align-items:center;justify-content:center}
+.miss-row .mx:hover{color:var(--status-bad);background:var(--ring)}
+.miss-empty{padding:14px 12px;color:var(--muted);font-size:12.5px}
+
+/* ============================ Report viewer ============================ */
+#viewer-root{position:fixed;inset:0;z-index:70;display:none}
+#viewer-root.open{display:block}
+#viewer-root .backdrop{position:absolute;inset:0;background:var(--backdrop)}
+.viewer{
+  position:absolute;inset:24px;background:#101423;border:1px solid var(--hairline);
+  border-radius:12px;box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden;
+}
+.viewer .v-head{
+  height:48px;flex:none;display:flex;align-items:center;gap:12px;padding:0 14px;
+  background:var(--surface-2);border-bottom:1px solid var(--hairline);
+}
+.viewer .v-head .v-name{font-weight:650;font-size:14px;color:var(--ink)}
+.viewer .v-head .v-when{color:var(--muted);font-size:12px}
+.viewer .v-head a{font-size:12.5px;margin-left:auto}
+.viewer .v-close{width:30px;height:30px;border-radius:8px;color:var(--muted);display:flex;align-items:center;justify-content:center;flex:none}
+.viewer .v-close:hover{color:var(--ink);background:var(--ring)}
+.viewer iframe{flex:1;width:100%;border:0;background:#101423}
+.viewer .v-err{margin:auto;max-width:420px;text-align:center;color:#a9aec2;font-size:14px;line-height:1.6;padding:20px}
+.viewer .v-err b{color:#f2f4fa}
+
+/* ============================ Toasts ============================ */
+#toasts{position:fixed;right:16px;bottom:16px;z-index:90;display:flex;flex-direction:column;gap:9px;width:330px;max-width:calc(100vw - 32px)}
+.toast{
+  background:var(--surface-2);border:1px solid var(--hairline);border-left:4px solid var(--muted);
+  border-radius:10px;box-shadow:var(--shadow);padding:11px 12px;display:flex;gap:10px;align-items:flex-start;
+  font-size:13px;color:var(--ink);
+}
+.toast.good{border-left-color:var(--status-good)}
+.toast.warn{border-left-color:var(--status-warn)}
+.toast.new{border-left-color:var(--link)}
+.toast .t-msg{flex:1;line-height:1.4}
+.toast .t-view{color:var(--link);font-weight:600;flex:none;padding:1px 4px;border-radius:5px}
+.toast .t-view:hover{text-decoration:underline}
+.toast .t-x{color:var(--muted);flex:none;width:20px;height:20px;border-radius:6px;display:flex;align-items:center;justify-content:center}
+.toast .t-x:hover{color:var(--ink);background:var(--ring)}
+
+/* ============================ Tooltip / boot card ============================ */
+#tip{
+  position:fixed;z-index:65;max-width:290px;background:var(--surface-2);color:var(--ink);
+  border:1px solid var(--hairline);border-radius:9px;box-shadow:var(--shadow);
+  padding:8px 11px;font-size:12.5px;line-height:1.45;pointer-events:none;display:none;
+}
+#boot-err{
+  position:fixed;inset:0 0 0 var(--rail);display:none;align-items:center;justify-content:center;z-index:30;padding:20px;
+}
+#boot-err.show{display:flex}
+#boot-err .card{
+  max-width:430px;text-align:center;background:var(--surface-2);border:1px solid var(--hairline);
+  border-radius:12px;box-shadow:var(--shadow);padding:30px 28px;
+}
+#boot-err .card .rocket{font-size:26px;margin-bottom:10px}
+#boot-err .card p{font-size:15px;line-height:1.55}
+#boot-err .card .small{font-size:12px;color:var(--muted);margin-top:10px}
+
+/* ============================ Reduced motion ============================ */
+@media (prefers-reduced-motion:reduce){
+  .pulse,.glow-in{animation:none}
+  .view{transition:opacity .16s ease;transform:none !important}
+  .view.z-from,.view.z-from-back{opacity:0}
+  #panel{transition:opacity .16s ease;transform:none}
+  #panel.open{transform:none}
+  #panel:not(.open){opacity:0}
+  g.hot .scaler{transition:none}
+}
+
+/* ===== Narrow / phone fallback: collapse the left rail back to a top bar ===== */
+@media (max-width:760px){
+  /* two thin stacked bars: brand (row 1) + search/ⓘ/theme (row 2), stage below */
+  #hdr{
+    left:0;top:0;width:100%;height:48px;flex-direction:row;align-items:center;gap:12px;
+    padding:0 12px;border-right:none;border-bottom:1px solid var(--hairline);
+  }
+  #hdr .brand{min-width:0;flex:none}
+  #hdr .brand .sub{display:none}          /* keep the bars tight on phones */
+  #stats{display:none}                    /* long counts line doesn't fit a phone bar */
+  #chrome-top{
+    top:48px;left:0;right:0;width:100%;height:52px;padding:8px 12px;gap:10px;
+    background:var(--surface);border-bottom:1px solid var(--hairline);pointer-events:auto;
+  }
+  #search-wrap{flex:1}
+  #search-box{width:auto;max-width:520px;flex:1}
+  #search-list{width:100%;max-width:none}
+  #stage-wrap{inset:100px 0 0 0}
+  #boot-err{inset:100px 0 0 0}
+  #panel{top:100px}
+}
+</style>
+</head>
+<body>
+
+<header id="hdr">
+  <div class="brand">
+    <h1>AI Landscape</h1>
+    <div class="sub" id="sub">loading…</div>
+  </div>
+  <span id="stats" class="tnum"></span>
+  <div id="rep-drop" role="menu" aria-label="Ready reports"></div>
+</header>
+
+<div id="chrome-top">
+  <div id="search-wrap">
+    <div id="search-box">
+      <svg class="mag" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="7" cy="7" r="4.4"/><path d="m10.4 10.4 3.4 3.4"/></svg>
+      <input id="search" type="text" placeholder="Search players, categories…" autocomplete="off" spellcheck="false"
+             role="combobox" aria-expanded="false" aria-controls="search-list" aria-autocomplete="list" aria-label="Search players and categories">
+      <span class="slash" aria-hidden="true">/</span>
+      <div id="search-list" role="listbox" aria-label="Search results"></div>
+    </div>
+  </div>
+  <button id="about-btn" aria-label="About this landscape and refresh scan" title="About &amp; refresh scan"></button>
+  <button id="theme-btn" aria-label="Switch to light theme" title="Toggle light/dark theme"></button>
+</div>
+
+<div id="stage-wrap">
+  <canvas id="stars" aria-hidden="true"></canvas>
+  <div id="stage"></div>
+</div>
+
+<aside id="panel" role="dialog" aria-label="Details panel" aria-hidden="true">
+  <div class="p-head"><button class="p-close" aria-label="Close panel">✕</button></div>
+  <div class="p-body"></div>
+</aside>
+
+<div id="viewer-root" role="dialog" aria-modal="true" aria-label="Report viewer"></div>
+<div id="modal-root" role="dialog" aria-modal="true" aria-label="Deep-research prompt"></div>
+<div id="toasts" aria-live="polite"></div>
+<div id="tip" role="tooltip"></div>
+
+<div id="boot-err">
+  <div class="card">
+    <div class="rocket">🛰️</div>
+    <p>Open me via <b>./run.command</b> — I need a local server to load data.</p>
+    <p class="small">Browsers block data loading from file:// pages. Double-click run.command (or run ./run.sh) in the ai-landscape-dash folder, then visit http://localhost:8787.</p>
+  </div>
+</div>
+
+<script type="module">
+/* ==================================================================
+   AI Landscape — single-file app. Built per BUILD_SPEC.md.
+   Everything renders from data/landscape.json; nothing here names
+   any category or player.
+   ================================================================== */
+
+/* ------------------------------ tokens ------------------------------ */
+// Category palette — CVD/contrast validated IN THIS ORDER (spec §5). Do not reorder.
+const PALETTE = ["#e16977","#0b7652","#b276d6","#766806","#3899ea","#b14325",
+  "#12aa9c","#9c4591","#87a11e","#455fbd","#d5771d","#006da9","#d76799",
+  "#277c20","#9481e8","#8e6301","#13a2cf"];
+const PROM_LABEL = {3:"category leader",2:"established",1:"notable newcomer"};
+const ASSET_V = Date.now();   // busts Chrome's in-memory image cache once per app load
+const REDUCED = matchMedia("(prefers-reduced-motion: reduce)");
+const SVGNS = "http://www.w3.org/2000/svg";
+
+/* ------------------------------ helpers ------------------------------ */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g,
+  c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+function svgEl(tag, attrs = {}){
+  const el = document.createElementNS(SVGNS, tag);
+  for (const [k,v] of Object.entries(attrs)) el.setAttribute(k, v);
+  return el;
+}
+// deterministic string hash → [0,1) (per-ring phase offsets)
+function hash01(str){
+  let h = 5381;
+  for (let i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) >>> 0;
+  return (h % 10000) / 10000;
+}
+// text measurement via canvas (deterministic per browser; avoids layout thrash)
+const measureCtx = document.createElement("canvas").getContext("2d");
+function textW(str, px, weight = 600){
+  measureCtx.font = `${weight} ${px}px system-ui, -apple-system, "Segoe UI", sans-serif`;
+  return measureCtx.measureText(str).width;
+}
+// color utils: lighten for strokes, WCAG-ish contrast for button text
+function mix(hex, to, f){
+  const n = parseInt(hex.slice(1), 16), tn = parseInt(to.slice(1), 16);
+  const ch = sh => Math.round(((n >> sh) & 255) + (((tn >> sh) & 255) - ((n >> sh) & 255)) * f);
+  return `rgb(${ch(16)},${ch(8)},${ch(0)})`;
+}
+function relLum(hex){
+  const n = parseInt(hex.slice(1), 16);
+  const f = v => { v /= 255; return v <= .03928 ? v/12.92 : ((v+.055)/1.055) ** 2.4; };
+  return .2126*f((n>>16)&255) + .7152*f((n>>8)&255) + .0722*f(n&255);
+}
+function textOn(hex){
+  const L = relLum(hex);
+  const cWhite = 1.05 / (L + .05), cDark = (L + .05) / .05;
+  return cWhite >= 4.5 || cWhite >= cDark ? "#ffffff" : "#0b0e18";
+}
+function relTime(iso){
+  if (!iso) return "";
+  const s = (Date.now() - Date.parse(iso)) / 1000;
+  if (!isFinite(s)) return "";
+  if (s < 50) return "just now";
+  if (s < 3600) return `${Math.round(s/60)} min ago`;
+  if (s < 86400) return `${Math.round(s/3600)} h ago`;
+  return `${Math.round(s/86400)} d ago`;
+}
+function fmtDate(iso){
+  if (!iso) return "";
+  const d = new Date(iso);
+  return isNaN(d) ? "" : d.toLocaleDateString(undefined, {year:"numeric", month:"short", day:"numeric"});
+}
+const firstSentence = t => (String(t ?? "").match(/^.*?[.!?](?=\s|$)/s) || [String(t ?? "")])[0];
+// untrusted-JSON guards: external URLs must be http(s); report paths must be relative
+const safeHttp = u => /^https?:\/\//i.test(String(u ?? "")) ? String(u) : null;
+function safeRelPath(p){
+  p = String(p ?? "");
+  if (!p || /^[a-z][a-z0-9+.-]*:/i.test(p) || p.startsWith("//") || p.startsWith("/") || p.includes("..")) return null;
+  return p;
+}
+
+/* ------------------------------ state ------------------------------ */
+const state = {
+  data: null, rawText: "",
+  route: {view:"galaxy"},
+  stageKey: "",            // which stage is mounted: "galaxy" | "orbit:<catId>"
+  catPanel: null,          // category-summary panel (not routed)
+  searchQuery: "", searchResults: [], searchSel: -1,
+  misses: [], missTimer: 0,   // client-side search-miss queue (localStorage-backed)
+  toasts: [], toastSeq: 0,
+  pollTimer: 0, resizeT: 0,
+  theme: "dark",
+  hoverPause: false, focusPause: false,
+  lastTrigger: null,       // element to refocus when a modal/panel layer closes
+  returnFocus: null,       // player id whose node should regain focus after panel close
+  pendingOrigin: null,     // zoom-transition origin (clicked sun position)
+};
+const orbitAngles = new Map(); // catId → [a0,a1,a2] rotation phase, survives re-renders
+let idx = {cats:new Map(), players:new Map(), catOf:new Map(), colors:new Map(), search:[]};
+let orbitLive = null;          // {nodes:[{el,ring,base,r}], cx, cy, catId}
+let galaxyLive = null;         // {nodes:[{el,u,v}], kx, ky, cx, cy, rotatable}
+let galaxyAngle = 0;           // galaxy swirl phase — persists across re-renders
+
+const stage = $("#stage"), panel = $("#panel"), tip = $("#tip");
+
+/* ------------------------------ data indexing ------------------------------ */
+function buildIndex(){
+  const d = state.data;
+  idx = {cats:new Map(), players:new Map(), catOf:new Map(), colors:new Map(), search:[]};
+  d.categories.forEach((c, i) => {
+    idx.cats.set(c.id, c);
+    idx.colors.set(c.id, PALETTE[i % PALETTE.length]);
+    idx.search.push({type:"cat", id:c.id, name:c.name,
+      fields:[[c.name.toLowerCase(), 1]]});
+    for (const p of c.players){
+      idx.players.set(p.id, p);
+      idx.catOf.set(p.id, c);
+      idx.search.push({type:"player", id:p.id, name:p.name, catName:c.name, catId:c.id,
+        fields:[[p.name.toLowerCase(), 1],
+                [String(p.tagline ?? "").toLowerCase(), .8],
+                [(p.tags || []).join(" ").toLowerCase(), .7],
+                [c.name.toLowerCase(), .5]]});
+    }
+  });
+}
+const catColor = id => idx.colors.get(id) || PALETTE[0];
+const readyReports = () => [...idx.players.values()].filter(p => p.report?.status === "ready");
+
+/* ------------------------------ routing ------------------------------ */
+function parseRoute(){
+  const parts = location.hash.replace(/^#/, "").split("/").filter(Boolean);
+  if (parts[0] === "cat" && idx.cats.has(parts[1])) return {view:"orbit", catId:parts[1]};
+  if (parts[0] === "player" && idx.players.has(parts[1]))
+    return {view:"player", playerId:parts[1], catId:idx.catOf.get(parts[1]).id};
+  if (parts[0] === "report" && idx.players.has(parts[1]))
+    return {view:"report", playerId:parts[1], catId:idx.catOf.get(parts[1]).id};
+  return {view:"galaxy"};
+}
+const go = h => { if (location.hash !== h) location.hash = h; else render(); };
+
+/* ==================================================================
+   Galaxy layout — golden-angle spiral, relaxed in UNIT space with
+   rotation-invariant spacing so the whole galaxy can swirl slowly
+   (like the orbit rings) without labels ever colliding.
+
+   Construction: node k starts at the golden-angle spiral position in a
+   unit disk; pairs are pushed apart until their unit distance ≥
+   hypot(Σhw/kx, Σhh/ky) — sufficient for their axis-aligned label rects
+   to be disjoint at ANY rotation angle (rect centers share one vertical
+   offset, so rect-center distances equal sun-center distances). Screen
+   position = center + (kx, ky)·rotate(u, v). If a window is too small
+   for that invariant to converge, we fall back to a static axis-overlap
+   relaxation and simply don't rotate. Deterministic throughout.
+   ================================================================== */
+function galaxyLayout(w, h){
+  const cats = state.data.categories;
+  const GA = 137.508 * Math.PI / 180, n = cats.length;
+  const PAD = 8, FILL = .95;
+  const norm = Math.sqrt(n - .4) / FILL;
+  const hh = nd => (nd.up + nd.dn) / 2;
+
+  // one relaxation attempt at a given zoom (shrink < 1 = pulled in from the edges)
+  const build = shrink => {
+    const kx = (w/2 - 40) * shrink, ky = (h/2 - 40) * shrink;
+    const nodes = cats.map((c, k) => {
+      const count = c.players.length;
+      const sunR = clamp(14 + 3 * Math.sqrt(count), 16, 40);
+      const wName = textW(c.name, 12.5, 600), wSub = textW(`${count} players`, 10.5, 500);
+      const pillW = Math.max(wName, wSub) + 24;
+      const hw = Math.max(sunR + 14, pillW/2 + 10); // half-width incl. pill (+font-metric slack)
+      return {cat:c, k, sunR, hw,
+        up: sunR + 12,                              // extent above center
+        dn: sunR + 46,                              // extent below (label pill)
+        u: Math.sqrt(k + .6) * Math.cos(k * GA) / norm,
+        v: Math.sqrt(k + .6) * Math.sin(k * GA) / norm,
+        // per-node orbit-radius cap keeps sun + label on stage at every angle
+        rmax: clamp(Math.min((w/2 - 24 - hw) / kx, (h/2 - 24 - (sunR + 46)) / ky), .15, .995)};
+    });
+    // hypot bound is EXACT for "rects disjoint at every rotation angle":
+    // the center-delta traces an ellipse with semi-axes (kx·ρ, ky·ρ), which
+    // avoids the (ΣW × ΣH) rectangle iff ρ ≥ hypot(ΣW/kx, ΣH/ky).
+    const needAt = (a, b, pad) => Math.hypot((a.hw + b.hw + pad) / kx, (hh(a) + hh(b) + pad) / ky);
+    let safe = false;
+    for (let it = 0; it < 160; it++){
+      let moved = false;
+      for (let i = 0; i < n; i++) for (let j = i+1; j < n; j++){
+        const a = nodes[i], b = nodes[j];
+        let du = b.u - a.u, dv = b.v - a.v, d = Math.hypot(du, dv);
+        const D = needAt(a, b, PAD);
+        if (d >= D) continue;
+        moved = true;
+        if (d < 1e-9){ du = 1; dv = 0; d = 1; }     // coincident → deterministic push
+        const p = (D - d) / 2 / d;
+        a.u -= du*p; a.v -= dv*p; b.u += du*p; b.v += dv*p;
+      }
+      for (const nd of nodes){                       // radial clamp to stage
+        const r = Math.hypot(nd.u, nd.v);
+        if (r > nd.rmax){ nd.u *= nd.rmax/r; nd.v *= nd.rmax/r; }
+      }
+      if (!moved){ safe = true; break; }
+    }
+    // padded target unmet is still fine if every pair clears the exact zero-pad
+    // bound (labels may pass close at some angles, but never touch)
+    if (!safe) safe = nodes.every((a, i) => nodes.every((b, j) =>
+      j <= i || Math.hypot(b.u - a.u, b.v - a.v) >= needAt(a, b, 0)));
+    return {nodes, kx, ky, safe, needAt};
+  };
+
+  // prefer a ~7% zoom-out (edge breathing room); if that makes rotation
+  // infeasible (small windows), trade the margin back for motion
+  let L = build(.93);
+  if (!L.safe){
+    const full = build(1);
+    if (full.safe) L = full;
+  }
+  if (!L.safe){
+    // window too small for the rotation invariant at any zoom → static layout:
+    // relax on axis overlaps only (cheaper constraint, converges everywhere)
+    const {nodes, kx, ky} = L;
+    for (let it = 0; it < 60; it++){
+      let moved = false;
+      for (let i = 0; i < n; i++) for (let j = i+1; j < n; j++){
+        const a = nodes[i], b = nodes[j];
+        const du = b.u - a.u, dv = b.v - a.v;
+        const px = (a.hw + b.hw + PAD)/kx - Math.abs(du);
+        const py = (hh(a) + hh(b) + PAD)/ky - Math.abs(dv);
+        if (px <= 0 || py <= 0) continue;
+        moved = true;
+        if (px < py){ const s = (du >= 0 ? 1 : -1) * px/2; a.u -= s; b.u += s; }
+        else        { const s = (dv >= 0 ? 1 : -1) * py/2; a.v -= s; b.v += s; }
+      }
+      for (const nd of nodes){
+        const r = Math.hypot(nd.u, nd.v);
+        if (r > nd.rmax){ nd.u *= nd.rmax/r; nd.v *= nd.rmax/r; }
+      }
+      if (!moved) break;
+    }
+  }
+  return {nodes: L.nodes, kx: L.kx, ky: L.ky, rotatable: L.safe};
+}
+
+/* ------------------------------ label pill (SVG) ------------------------------ */
+function addPill(g, lines, topY){
+  // lines: [{text, cls, size, weight}]
+  const wMax = Math.max(...lines.map(l => textW(l.text, l.size, l.weight)));
+  const pw = wMax + 20, ph = 8 + lines.length * 15;
+  g.appendChild(svgEl("rect", {class:"lbl-pill", x:-pw/2, y:topY, width:pw, height:ph, rx:9}));
+  lines.forEach((l, i) => {
+    const t = svgEl("text", {class:l.cls, x:0, y:topY + 19 + i*15, "text-anchor":"middle"});
+    t.textContent = l.text;
+    g.appendChild(t);
+  });
+}
+
+/* ==================================================================
+   Galaxy view
+   ================================================================== */
+function buildGalaxy(){
+  const w = stage.clientWidth, h = stage.clientHeight;
+  const svg = svgEl("svg", {viewBox:`0 0 ${w} ${h}`, role:"group", "aria-label":"Galaxy of categories"});
+  const defs = svgEl("defs");
+  svg.appendChild(defs);
+  state.data.categories.forEach((c, i) => {
+    const grad = svgEl("radialGradient", {id:`gl-${i}`});
+    grad.appendChild(svgEl("stop", {offset:"0%", "stop-color":PALETTE[i % PALETTE.length], "stop-opacity":".5"}));
+    grad.appendChild(svgEl("stop", {offset:"100%", "stop-color":PALETTE[i % PALETTE.length], "stop-opacity":"0"}));
+    defs.appendChild(grad);
+  });
+  const L = galaxyLayout(w, h);
+  const live = {nodes:[], kx:L.kx, ky:L.ky, cx:w/2, cy:h/2, rotatable:L.rotatable};
+  for (const n of L.nodes){
+    const c = n.cat, i = state.data.categories.indexOf(c), color = PALETTE[i % PALETTE.length];
+    const anyReady = c.players.some(p => p.report?.status === "ready");
+    const anyProg  = c.players.some(p => p.report?.status === "in_progress");
+    const g = svgEl("g", {class:"hot sun", tabindex:"0", role:"link", "data-pause":"1",
+      "data-go":`#/cat/${c.id}`, "data-tip":firstSentence(c.pls),
+      "aria-label":`${c.name}, ${c.players.length} players`});
+    const sc = svgEl("g", {class:"scaler"});
+    sc.appendChild(svgEl("circle", {class:"glow", r:n.sunR*2.6, fill:`url(#gl-${i})`}));
+    sc.appendChild(svgEl("circle", {r:n.sunR, fill:color, stroke:mix(color, "#ffffff", .45), "stroke-width":"1.5"}));
+    if (anyProg) sc.appendChild(svgEl("circle", {class:"pulse", r:n.sunR+5, fill:"none",
+      stroke:"var(--status-warn)", "stroke-width":"2"}));
+    if (anyReady){
+      const bx = n.sunR*.72, by = -n.sunR*.72;
+      sc.appendChild(svgEl("circle", {cx:bx, cy:by, r:6.5, fill:"var(--status-good)", stroke:"var(--bg)", "stroke-width":"1.5"}));
+      const chk = svgEl("text", {x:bx, y:by+3.2, "text-anchor":"middle", "font-size":"8.5", fill:"#ffffff"});
+      chk.textContent = "✓"; sc.appendChild(chk);
+    }
+    g.appendChild(sc);
+    g.appendChild(svgEl("circle", {class:"focus-ring", r:n.sunR+5}));
+    addPill(g, [
+      {text:c.name, cls:"lbl-name", size:12.5, weight:600},
+      {text:`${c.players.length} players`, cls:"lbl-sub", size:10.5, weight:500},
+    ], n.sunR + 6);
+    svg.appendChild(g);
+    live.nodes.push({el:g, u:n.u, v:n.v});
+  }
+  galaxyLive = live;
+  positionGalaxy(live);   // place at the current swirl angle (0 on first load)
+  const view = document.createElement("div");
+  view.className = "view";
+  view.appendChild(svg);
+  return view;
+}
+// the galaxy swirls as one rigid body (elliptical orbits around the center);
+// labels stay upright because nodes are translated, never rotated
+function positionGalaxy(live){
+  const a = live.rotatable ? galaxyAngle : 0;
+  const c = Math.cos(a), s = Math.sin(a);
+  for (const n of live.nodes){
+    n.el.setAttribute("transform",
+      `translate(${live.cx + live.kx*(n.u*c - n.v*s)},${live.cy + live.ky*(n.u*s + n.v*c)})`);
+  }
+}
+
+/* ==================================================================
+   Orbit view — three prominence rings, slow deterministic rotation
+   ================================================================== */
+function buildOrbit(catId){
+  const c = idx.cats.get(catId), color = catColor(catId);
+  const w = stage.clientWidth, h = stage.clientHeight;
+  const cx = w/2, cy = h/2;
+  const svg = svgEl("svg", {viewBox:`0 0 ${w} ${h}`, role:"group", "aria-label":`${c.name} orbit`});
+  const defs = svgEl("defs");
+  const grad = svgEl("radialGradient", {id:"gl-c"});
+  grad.appendChild(svgEl("stop", {offset:"0%", "stop-color":color, "stop-opacity":".55"}));
+  grad.appendChild(svgEl("stop", {offset:"100%", "stop-color":color, "stop-opacity":"0"}));
+  defs.appendChild(grad); svg.appendChild(defs);
+
+  // ring radii: base fractions of the viewport, widened when a ring is crowded
+  const maxR = Math.min(w, h)/2 - 64;
+  // ring 0 = inner (prominence 3) … ring 2 = outer (1); odd values land outside
+  const byRing = [[], [], []];
+  for (const pl of c.players) byRing[pl.prominence === 3 ? 0 : pl.prominence === 2 ? 1 : 2].push(pl);
+  // per-category node-size bump (jfo: Agent Memory reads better with slightly larger nodes)
+  const nodeBump = catId === "agent-memory" ? 3 : 0;
+  const nodeR = [22, 17, 13].map(v => v + nodeBump);
+  const caps = [.58, .82, 1].map(f => f*maxR);
+  const radii = [.42, .68, .94].map((f, ri) => {
+    const n = byRing[ri].length;
+    const full = f*maxR;                                   // the ring's "at capacity" radius
+    if (!n) return full;
+    const widest = Math.max(...byRing[ri].map(p => textW(p.name, 11.5, 600) + 20), 60);
+    const need = n * (widest + 26) / (2*Math.PI);          // circumference the labels need
+    // Sparse rings (few nodes on a wide ring) read poorly, so pull them in a
+    // LITTLE toward a fill-matched radius. fill = how much of the base ring the
+    // labels actually occupy; only under-half-full rings move, and never by more
+    // than ~16%. Dense or long-label rings (fill ≥ .5) are untouched — Math.max
+    // with `need` still lets them push outward exactly as before.
+    const fill = clamp(need / full, 0, 1);
+    const scale = fill >= .5 ? 1 : 0.84 + 0.32*fill;       // continuous at fill=.5 → 1
+    return clamp(Math.max(full*scale, need), 90, caps[ri]);
+  });
+  radii[1] = clamp(Math.max(radii[1], radii[0]+58), 0, caps[1]);
+  radii[2] = clamp(Math.max(radii[2], radii[1]+58), 0, caps[2]);
+  // crowded rings: adjacent labels would touch → stagger alternate labels one
+  // row lower (angular distribution stays even) and widen the ring gap a bit
+  const stagger = radii.map((r, ri) => {
+    const n = byRing[ri].length;
+    if (n < 2) return false;
+    const chord = 2 * r * Math.sin(Math.PI / n);
+    const widest = Math.max(...byRing[ri].map(p => textW(p.name, 11.5, 600) + 20));
+    return chord < widest + 10;
+  });
+  if (stagger[0]) radii[1] = clamp(Math.max(radii[1], radii[0]+76), 0, caps[1]);
+  if (stagger[1]) radii[2] = clamp(Math.max(radii[2], radii[1]+76), 0, caps[2]);
+
+  for (let ri = 0; ri < 3; ri++)
+    if (byRing[ri].length) svg.appendChild(svgEl("circle", {class:"orbit-ring", cx, cy, r:radii[ri]}));
+
+  // central sun (click → category summary panel)
+  const sun = svgEl("g", {class:"hot", transform:`translate(${cx},${cy})`, tabindex:"0", role:"button",
+    "data-catpanel":catId, "data-tip":firstSentence(c.pls),
+    "aria-label":`${c.name} — category summary`});
+  const ssc = svgEl("g", {class:"scaler"});
+  ssc.appendChild(svgEl("circle", {r:96, fill:"url(#gl-c)"}));
+  ssc.appendChild(svgEl("circle", {r:32, fill:color, stroke:mix(color, "#ffffff", .45), "stroke-width":"1.5"}));
+  sun.appendChild(ssc);
+  sun.appendChild(svgEl("circle", {class:"focus-ring", r:37}));
+  addPill(sun, [
+    {text:c.name, cls:"lbl-name", size:12.5, weight:600},
+    {text:`${c.players.length} players · ⓘ summary`, cls:"lbl-sub", size:10.5, weight:500},
+  ], 38);
+  svg.appendChild(sun);
+
+  // players
+  const live = {catId, cx, cy, nodes:[]};
+  if (!orbitAngles.has(catId)) orbitAngles.set(catId, [0, 0, 0]);
+  byRing.forEach((players, ri) => {
+    const phase = hash01(catId) * 2*Math.PI + ri * 2.1;    // deterministic per-ring phase
+    players.forEach((p, i) => {
+      const base = phase + i * 2*Math.PI / players.length;
+      const r = nodeR[ri];
+      const st = p.report?.status || "none";
+      const stText = st === "ready" ? "Report ready" : st === "in_progress" ? "Research in progress" : "";
+      const g = svgEl("g", {class:"hot node", tabindex:"0", role:"link", "data-pause":"1",
+        "data-go":`#/player/${p.id}`, "data-tip":p.tagline || "", "data-node":p.id,
+        "aria-label":`${p.name} — ${p.tagline || ""}${stText ? ". " + stText : ""}`});
+      const sc = svgEl("g", {class:"scaler"});
+      sc.appendChild(svgEl("circle", {r:Math.max(22, r+8), fill:"transparent"})); // ≥44px hit halo
+      // logo chip: assets/logos/<id>.png (baked disc) clipped to a circle with a
+      // category-color ring. Until the image loads — or if the file is missing —
+      // the classic colored bubble shows instead, so logo-less players degrade cleanly.
+      const bubble = svgEl("circle", {r, fill:color, "fill-opacity":".85"});
+      sc.appendChild(bubble);
+      const safeId = p.id.replace(/[^\w-]/g, "");
+      const cp = svgEl("clipPath", {id:`lg-${safeId}`});
+      cp.appendChild(svgEl("circle", {r:r-1}));
+      defs.appendChild(cp);
+      const logo = svgEl("image", {x:-(r-1), y:-(r-1), width:2*(r-1), height:2*(r-1),
+        "clip-path":`url(#lg-${safeId})`, preserveAspectRatio:"xMidYMid meet"});
+      logo.setAttribute("href", `assets/logos/${safeId}.png?v=${ASSET_V}`);
+      logo.addEventListener("load", () => bubble.setAttribute("fill-opacity", "0"));
+      logo.addEventListener("error", () => logo.remove());
+      sc.appendChild(logo);
+      sc.appendChild(svgEl("circle", {r, fill:"none", stroke:color, "stroke-width":"2"}));
+      if (st === "in_progress"){
+        sc.appendChild(svgEl("circle", {class:"pulse", r:r+4, fill:"none", stroke:"var(--status-warn)", "stroke-width":"2"}));
+        const bg = svgEl("g", {}); const bx = r*.78, by = -r*.78;
+        bg.appendChild(svgEl("circle", {cx:bx, cy:by, r:6.5, fill:"var(--status-warn)", stroke:"var(--bg)", "stroke-width":"1.5"}));
+        const dots = svgEl("text", {x:bx, y:by+2.6, "text-anchor":"middle", "font-size":"8", "font-weight":"700", fill:"#0b0e18"});
+        dots.textContent = "…"; bg.appendChild(dots);
+        const t = svgEl("title"); t.textContent = "Research in progress"; bg.appendChild(t);
+        sc.appendChild(bg);
+      } else if (st === "ready"){
+        const bg = svgEl("g", {}); const bx = r*.78, by = -r*.78;
+        bg.appendChild(svgEl("circle", {cx:bx, cy:by, r:6.5, fill:"var(--status-good)", stroke:"var(--bg)", "stroke-width":"1.5"}));
+        const chk = svgEl("text", {x:bx, y:by+3.2, "text-anchor":"middle", "font-size":"8.5", fill:"#ffffff"});
+        chk.textContent = "✓"; bg.appendChild(chk);
+        const t = svgEl("title"); t.textContent = "Report ready"; bg.appendChild(t);
+        sc.appendChild(bg);
+      }
+      g.appendChild(sc);
+      g.appendChild(svgEl("circle", {class:"focus-ring", r:r+5}));
+      const lift = stagger[ri] && i % 2 === 1 ? 16 : 0;   // alternate-row labels on crowded rings
+      addPill(g, [{text:p.name, cls:"lbl-name sm", size:11.5, weight:600}], r + 5 + lift);
+      svg.appendChild(g);
+      live.nodes.push({el:g, ring:ri, base, r:radii[ri]});
+    });
+  });
+  positionOrbit(live);
+
+  const view = document.createElement("div");
+  view.className = "view";
+  view.appendChild(svg);
+
+  // breadcrumb + prev/next chevrons
+  const crumb = document.createElement("nav");
+  crumb.id = "crumb";
+  crumb.innerHTML = `<a href="#/">← Galaxy</a><span class="sep">/</span><span class="cur">${esc(c.name)}</span>`;
+  view.appendChild(crumb);
+  const cats = state.data.categories, ci = cats.findIndex(x => x.id === catId);
+  const prev = cats[(ci - 1 + cats.length) % cats.length], next = cats[(ci + 1) % cats.length];
+  for (const [cls, target, sym] of [["prev", prev, "‹"], ["next", next, "›"]]){
+    const b = document.createElement("button");
+    b.className = `chev ${cls}`;
+    b.setAttribute("data-go", `#/cat/${target.id}`);
+    b.setAttribute("aria-label", `${cls === "prev" ? "Previous" : "Next"} category: ${target.name}`);
+    b.textContent = sym;
+    view.appendChild(b);
+  }
+  orbitLive = live;
+  return view;
+}
+function positionOrbit(live){
+  const angles = orbitAngles.get(live.catId);
+  for (const n of live.nodes){
+    const a = n.base + angles[n.ring];
+    n.el.setAttribute("transform",
+      `translate(${live.cx + n.r*Math.cos(a)},${live.cy + n.r*Math.sin(a)})`);
+  }
+}
+
+/* ==================================================================
+   Stage mount / zoom transitions
+   ================================================================== */
+let stageView = null;
+function mountStage(targetKey, opts = {}){
+  const old = stageView;
+  const fresh = targetKey === "galaxy" ? buildGalaxy() : buildOrbit(targetKey.slice(6));
+  if (targetKey === "galaxy") orbitLive = null; else galaxyLive = null;
+  state.stageKey = targetKey;
+  stageView = fresh;
+  stage.appendChild(fresh);
+  if (!old){ fresh.classList.add("z-live"); return; }
+  if (opts.instant){ old.remove(); fresh.classList.add("z-live"); return; }
+  // zoom: galaxy→orbit scales the galaxy up around the clicked sun; back reverses
+  const inward = targetKey.startsWith("orbit:") && old !== fresh;
+  fresh.classList.add(inward ? "z-from" : "z-from-back");
+  if (opts.origin && inward) old.style.transformOrigin = `${opts.origin.x}px ${opts.origin.y}px`;
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    fresh.classList.remove("z-from", "z-from-back");
+    fresh.classList.add("z-live");
+    old.classList.add(inward ? "z-out-in" : "z-out-back");
+  }));
+  setTimeout(() => old.remove(), REDUCED.matches ? 200 : 420);
+}
+
+/* ==================================================================
+   Side panel (player or category summary)
+   ================================================================== */
+function reportBlockHTML(p){
+  const r = p.report || {};
+  // primary buttons take the player's category color (spec §5); text picked for ≥4.5:1
+  const color = catColor(idx.catOf.get(p.id).id);
+  const prim = `style="background:${color};color:${textOn(color)}"`;
+  if (r.status === "ready"){
+    return `<div class="report-block" data-status="ready">
+      <span class="badge good"><span class="b-dot"></span>Report ready</span>
+      <div class="rb-when">updated ${esc(fmtDate(r.updated))}</div>
+      <button class="btn primary" ${prim} data-open-report="${esc(p.id)}">Open report</button>
+      <button class="btn ghost" data-prompt="${esc(p.id)}" data-variant="Refresh">Copy refresh prompt</button>
+    </div>`;
+  }
+  if (r.status === "in_progress"){
+    const started = r.updated ? `<div class="rb-when">started ${esc(relTime(r.updated))}</div>` : "";
+    return `<div class="report-block" data-status="in_progress">
+      <span class="badge warn pulse"><span class="b-dot"></span>Research in progress…</span>
+      ${started}
+      <button class="btn ghost" data-prompt="${esc(p.id)}" data-variant="Create">Re-copy prompt</button>
+    </div>`;
+  }
+  return `<div class="report-block" data-status="none">
+    <div class="rb-line">No deep report yet.</div>
+    <button class="btn primary" ${prim} data-prompt="${esc(p.id)}" data-variant="Create">Copy deep-research prompt</button>
+  </div>`;
+}
+function renderPanel(){
+  const r = state.route;
+  const body = panel.querySelector(".p-body");
+  const wantPlayer = (r.view === "player" || r.view === "report") ? r.playerId : null;
+  const wantCat = state.catPanel;
+  if (!wantPlayer && !wantCat){
+    if (panel.contains(document.activeElement)) document.activeElement.blur();
+    panel.classList.remove("open");
+    panel.setAttribute("aria-hidden", "true");
+    $("#stage").classList.remove("dim");
+    state.hoverPause = state.focusPause = false;   // fresh start — no stale pause after closing
+    return;
+  }
+  const hadFocus = panel.contains(document.activeElement);
+  const prevScroll = body.scrollTop;
+  if (wantPlayer){
+    const p = idx.players.get(wantPlayer), c = idx.catOf.get(wantPlayer), color = catColor(c.id);
+    const url = safeHttp(p.url);
+    body.dataset.player = p.id;
+    body.innerHTML = `
+      <a class="cat-chip" href="#/cat/${esc(c.id)}"><span class="dot" style="background:${color}"></span>${esc(c.name)}</a>
+      <h2>${esc(p.name)}</h2>
+      <div class="tagline">${esc(p.tagline || "")}</div>
+      <div class="chips">
+        ${(p.tags || []).map(t => `<span class="chip">${esc(t)}</span>`).join("")}
+        <span class="chip prom">${esc(PROM_LABEL[p.prominence] || "")}</span>
+      </div>
+      <p class="pls">${esc(p.pls || "")}</p>
+      ${url ? `<a class="ext" href="${esc(url)}" target="_blank" rel="noopener">${esc(url.replace(/^https?:\/\//, "").replace(/\/$/, ""))} ↗</a>` : ""}
+      ${reportBlockHTML(p)}
+      <p class="foot-note">Reports are generated by your local agent — see AGENT.md.</p>`;
+  } else {
+    const c = idx.cats.get(wantCat), color = catColor(wantCat);
+    delete body.dataset.player;
+    body.innerHTML = `
+      <span class="cat-chip"><span class="dot" style="background:${color}"></span>category</span>
+      <h2>${esc(c.name)}</h2>
+      <div class="tagline">${c.players.length} players</div>
+      <p class="pls">${esc(c.pls || "")}</p>
+      <p class="foot-note">Click any orbiting player for details and deep-research reports.</p>`;
+  }
+  const wasOpen = panel.classList.contains("open");
+  panel.classList.add("open");
+  panel.removeAttribute("aria-hidden");
+  $("#stage").classList.add("dim");
+  body.scrollTop = prevScroll && wasOpen ? prevScroll : 0;
+  if (!wasOpen || hadFocus) panel.querySelector(".p-close").focus();
+}
+function closePanelRoute(){
+  if (state.catPanel){ state.catPanel = null; renderPanel(); restoreTrigger(); return; }
+  const r = state.route;
+  if (r.view === "player" || r.view === "report"){
+    state.returnFocus = r.playerId;      // give focus back to the origin node
+    go(`#/cat/${r.catId}`);
+  }
+}
+
+/* ==================================================================
+   Prompt modal — the DRR handoff (spec §4.6, template verbatim)
+   ================================================================== */
+function promptText(p, variant){
+  const c = idx.catOf.get(p.id);
+  const sibs = c.players.filter(x => x.id !== p.id).slice(0, 8).map(x => x.name).join(", ");
+  const d = new Date();
+  const today = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+  return `${variant} a deep-research report for my AI Landscape app.
+
+Working folder: this project (ai-landscape-dash). Read AGENT.md first and follow
+its DRR workflow and report style contract exactly.
+
+Subject: ${p.name} (${p.url})
+Landscape category: ${c.name} — alongside ${sibs}
+Player id: ${p.id}   ·   Today: ${today}
+Current one-liner in the app: "${p.tagline}"
+
+Steps (from AGENT.md, summarized):
+1. In data/landscape.json set players[${p.id}].report.status = "in_progress",
+   bump top-level "updated", save. (This shows a spinner in my app.)
+2. Research the CURRENT state well enough to TEACH it, not just list it: what it
+   is and the problem it exists to solve, product & technology, market position vs
+   the siblings above, business & pricing, developments from the last 6-12 months,
+   and honest tensions/limitations. Explore surrounding context (what it competes
+   with, assumes, depends on); verify against multiple current sources; keep fact
+   separate from interpretation.
+3. Write a polished, self-contained HTML report to reports/${p.id}.html following
+   the style contract in AGENT.md — the "brief" aesthetic (dark, #101423 bg,
+   per-category accent, geometric font, kicker/H1, numbered section heads, stat
+   tiles, badges, reliability-rated source table) written to TEACH: orient then
+   deepen, intuition before detail, HTML/CSS diagrams (no ASCII), non-fawning
+   risks, and a five-question "check your understanding" quiz. Interactivity is
+   CSS-only — the iframe runs no JavaScript. Inline CSS only, no external requests
+   (no web fonts). Validate before publishing: complete file, zero external deps,
+   quiz reveals feedback on click, code-block whitespace intact. See
+   reports/claude-science.html for the visual system.
+4. Update data/landscape.json for this player: report.status = "ready",
+   report.path = "reports/${p.id}.html", report.updated = UTC now;
+   refresh the player's "pls"/"tagline" if stale; bump top-level "updated";
+   validate with: python3 -m json.tool data/landscape.json > /dev/null
+5. Save. My app polls the JSON and will announce the report on its own -
+   do not edit index.html or any other file.`;
+}
+function openModal(playerId, variant){
+  const p = idx.players.get(playerId);
+  if (!p) return;
+  state.lastTrigger = document.activeElement;
+  const root = $("#modal-root");
+  root.innerHTML = `<div class="backdrop" data-close-modal></div>
+    <div class="modal">
+      <button class="m-close" data-close-modal aria-label="Close">✕</button>
+      <h3>Deep-research prompt — ${esc(p.name)}</h3>
+      <div class="hint">Paste this to your local agent <strong>in this folder</strong>. The app will notice by itself when the report lands.</div>
+      <textarea readonly rows="16" spellcheck="false" aria-label="Deep-research prompt"></textarea>
+      <div class="m-foot"><button class="btn primary" data-copy>Copy to clipboard</button></div>
+    </div>`;
+  root.dataset.kind = "drr";
+  root.querySelector("textarea").value = promptText(p, variant);
+  root.classList.add("open");
+  root.querySelector("[data-copy]").focus();
+}
+function closeModal(){
+  const root = $("#modal-root");
+  if (!root.classList.contains("open")) return;
+  const wasAbout = root.dataset.kind === "about";
+  root.classList.remove("open");
+  root.innerHTML = "";
+  delete root.dataset.kind;
+  restoreTrigger();
+  // dismissing the About/queue view — by outside-click, ✕, or Esc — resets the
+  // search-miss flow to clean cluster state: clear the typed query + the
+  // zero-result "noted / review the queue" sub-box.
+  if (wasAbout) clearSearch(true);
+}
+async function copyPrompt(btn){
+  const ta = $("#modal-root textarea");
+  if (!ta) return;
+  let ok = false;
+  try { await navigator.clipboard.writeText(ta.value); ok = true; }
+  catch {
+    ta.select(); ta.setSelectionRange(0, ta.value.length);
+    try { ok = document.execCommand("copy"); } catch { ok = false; }
+  }
+  const prev = btn.textContent;
+  btn.textContent = ok ? "Copied ✓" : "Copy failed — select & copy manually";
+  setTimeout(() => { btn.textContent = prev; }, 2000);
+}
+
+/* ==================================================================
+   Report viewer (routed overlay, sandboxed iframe)
+   ================================================================== */
+let viewerFor = "";
+async function renderViewer(){
+  const root = $("#viewer-root");
+  if (state.route.view !== "report"){
+    const wasOpen = root.classList.contains("open");
+    root.classList.remove("open"); root.innerHTML = ""; viewerFor = "";
+    // Esc from the viewer unwinds to the panel — hand focus back to it
+    if (wasOpen && state.route.view === "player") panel.querySelector(".p-close")?.focus();
+    return;
+  }
+  const p = idx.players.get(state.route.playerId);
+  const path = safeRelPath(p.report?.path);
+  const key = `${p.id}|${p.report?.updated}|${path}`;
+  if (viewerFor === key && root.classList.contains("open")) return;
+  viewerFor = key;
+  root.innerHTML = `<div class="backdrop" data-close-viewer></div>
+    <div class="viewer">
+      <div class="v-head">
+        <span class="v-name">${esc(p.name)}</span>
+        <span class="v-when">updated ${esc(fmtDate(p.report?.updated))}</span>
+        ${path ? `<a href="${esc(path)}?t=${encodeURIComponent(p.report?.updated || "")}" target="_blank" rel="noopener">Open in new tab ↗</a>` : "<span style='margin-left:auto'></span>"}
+        <button class="v-close" data-close-viewer aria-label="Close report">✕</button>
+      </div>
+      <div class="v-body" style="flex:1;display:flex;background:#101423"></div>
+    </div>`;
+  root.classList.add("open");
+  root.querySelector(".v-close").focus();
+  const bodyEl = root.querySelector(".v-body");
+  const missing = () => { bodyEl.innerHTML = `<div class="v-err"><b>Report file missing</b><br>status says ready but ${esc(path || `reports/${p.id}.html`)} wasn't found.</div>`; };
+  if (!path || p.report?.status !== "ready") return missing();
+  try {
+    const head = await fetch(`${path}?t=${encodeURIComponent(p.report.updated || Date.now())}`, {method:"HEAD", cache:"no-store"});
+    if (!head.ok) return missing();
+  } catch { return missing(); }
+  const fr = document.createElement("iframe");
+  fr.setAttribute("sandbox", "allow-same-origin");
+  fr.title = `Report: ${p.name}`;
+  fr.src = `${path}?t=${encodeURIComponent(p.report.updated || "")}`;
+  bodyEl.innerHTML = "";
+  bodyEl.appendChild(fr);
+}
+const closeViewerRoute = () => go(`#/player/${state.route.playerId}`);
+
+/* ==================================================================
+   Toasts (bottom-right, max 4 visible, auto-dismiss 8 s)
+   ================================================================== */
+function toast(kind, msg, viewId){
+  state.toasts.push({id:++state.toastSeq, kind, msg, viewId, shown:false, timer:0});
+  renderToasts();
+}
+function dismissToast(id){
+  const t = state.toasts.find(t => t.id === id);
+  if (t?.timer) clearTimeout(t.timer);
+  state.toasts = state.toasts.filter(t => t.id !== id);
+  renderToasts();
+}
+function renderToasts(){
+  const box = $("#toasts");
+  const visible = state.toasts.slice(0, 4);
+  box.innerHTML = "";
+  for (const t of visible){
+    if (!t.shown){ t.shown = true; t.timer = setTimeout(() => dismissToast(t.id), 8000); }
+    const el = document.createElement("div");
+    el.className = `toast ${t.kind}`;
+    el.setAttribute("role", "status");
+    el.innerHTML = `<div class="t-msg">${esc(t.msg)}</div>
+      ${t.viewId ? `<button class="t-view" data-toast-view="${esc(t.viewId)}" data-toast-id="${t.id}">View</button>` : ""}
+      <button class="t-x" data-toast-x="${t.id}" aria-label="Dismiss">✕</button>`;
+    box.appendChild(el);
+  }
+}
+
+/* ==================================================================
+   Search — instant fuzzy over precomputed haystacks
+   ================================================================== */
+function matchScore(hay, q){
+  const i = hay.indexOf(q);
+  if (i === 0) return 100;                                   // exact prefix
+  if (i > 0 && !/[a-z0-9]/.test(hay[i-1])) return 80;        // word-boundary prefix
+  if (i > 0) return 60;                                      // substring
+  let hi = 0;                                                // subsequence
+  for (const ch of q){ hi = hay.indexOf(ch, hi); if (hi < 0) return 0; hi++; }
+  return 30;
+}
+function runSearch(q){
+  q = q.trim().toLowerCase();
+  if (!q) return [];
+  // punctuation-only queries (e.g. "/" or "\") match nothing — otherwise a lone
+  // slash substring-matches names like "Milvus / Zilliz" and looks like a shortcut
+  if (!/[a-z0-9]/.test(q)) return [];
+  const out = [];
+  for (const e of idx.search){
+    let best = 0;
+    for (const [hay, wt] of e.fields){
+      const s = matchScore(hay, q) * wt;
+      if (s > best) best = s;
+    }
+    if (best > 0) out.push({e, s:best});
+  }
+  out.sort((a, b) => b.s - a.s || a.e.name.localeCompare(b.e.name));
+  return out.slice(0, 8).map(x => x.e);
+}
+function renderSearchList(){
+  const list = $("#search-list"), input = $("#search");
+  if (!state.searchResults.length){
+    const q = state.searchQuery, nq = normQuery(q);
+    if (nq.length >= 2 && /[a-z0-9]/.test(nq)){
+      // zero-result state: tell the user it's noted for the next refresh scan
+      const queued = state.misses.some(m => m.q === nq);
+      list.innerHTML = `<div class="miss"><b>Not in the landscape.</b> “<span class="q">${esc(q.trim())}</span>” — ${queued ? "queued" : "noted"} for the next refresh scan.<br>
+        <span class="rev" data-open-about role="button" tabindex="0">Review the queue${state.misses.length ? ` (${state.misses.length})` : ""} →</span></div>`;
+      list.classList.add("open");
+      input.setAttribute("aria-expanded", "true");
+    } else {
+      list.classList.remove("open"); list.innerHTML = "";
+      input.setAttribute("aria-expanded", "false");
+    }
+    return;
+  }
+  const cats = state.searchResults.filter(r => r.type === "cat");
+  const players = state.searchResults.filter(r => r.type === "player");
+  // state.searchResults is already sorted best-score-first, so [0] is the global
+  // top match. Lead with whichever group contains it, so the default selection
+  // (searchSel 0) is the strongest result — a weak subsequence category match no
+  // longer outranks a strong player match (e.g. "grok" → xAI, not a framework).
+  const playersFirst = state.searchResults[0]?.type === "player";
+  const first = playersFirst ? players : cats, second = playersFirst ? cats : players;
+  const firstLabel = playersFirst ? "Players" : "Categories", secondLabel = playersFirst ? "Categories" : "Players";
+  let html = "", n = 0;
+  const opt = r => {
+    const i = n++;
+    const color = catColor(r.type === "cat" ? r.id : r.catId);
+    const ctx = r.type === "cat" ? "category" : r.catName;
+    return `<div class="opt${i === state.searchSel ? " sel" : ""}" role="option" id="sr-${i}"
+      aria-selected="${i === state.searchSel}" data-ri="${i}">
+      <span class="dot" style="background:${color}"></span>
+      <span class="nm">${esc(r.name)}</span><span class="ctx">${esc(ctx)}</span></div>`;
+  };
+  if (first.length) html += `<div class="grp">${firstLabel}</div>` + first.map(opt).join("");
+  if (second.length) html += `<div class="grp">${secondLabel}</div>` + second.map(opt).join("");
+  state.searchResults = [...first, ...second];   // display order = navigation order
+  list.innerHTML = html;
+  list.classList.add("open");
+  input.setAttribute("aria-expanded", "true");
+  input.setAttribute("aria-activedescendant", state.searchSel >= 0 ? `sr-${state.searchSel}` : "");
+  list.querySelector(".opt.sel")?.scrollIntoView({block:"nearest"});
+}
+function searchNavigate(i){
+  const r = state.searchResults[i];
+  if (!r) return;
+  clearSearch(true);
+  go(r.type === "cat" ? `#/cat/${r.id}` : `#/player/${r.id}`);
+}
+function clearSearch(blur){
+  const input = $("#search");
+  input.value = ""; state.searchQuery = ""; state.searchResults = []; state.searchSel = -1;
+  renderSearchList();
+  if (blur) input.blur();
+}
+
+/* ==================================================================
+   Search-miss capture — a persistent queue for the next refresh scan.
+   Lives client-side only (localStorage); NEVER written to landscape.json.
+   The app stays static; the queue is what an agent-in-the-loop consumes.
+   ================================================================== */
+const MISS_KEY = "ai-landscape:misses:v1";
+const normQuery = q => String(q ?? "").trim().replace(/\s+/g, " ").toLowerCase();
+function loadMisses(){
+  try { const v = JSON.parse(localStorage.getItem(MISS_KEY) || "[]"); return Array.isArray(v) ? v : []; }
+  catch { return []; }   // storage disabled/unavailable → in-memory only, app still works
+}
+function saveMisses(){ try { localStorage.setItem(MISS_KEY, JSON.stringify(state.misses)); } catch {} }
+function recordMiss(rawQuery){
+  const q = normQuery(rawQuery);
+  if (q.length < 2 || !/[a-z0-9]/.test(q)) return;               // ignore trivial / punctuation-only
+  const now = new Date().toISOString();
+  // prune in-progress typing: a just-added prefix of this query (count 1, seen <20s ago) was the same keystroke run
+  state.misses = state.misses.filter(m =>
+    !(q.startsWith(m.q) && q !== m.q && m.count === 1 && Date.parse(now) - Date.parse(m.last) < 20000));
+  const ex = state.misses.find(m => m.q === q);                  // dedupe exact normalized query
+  if (ex){ ex.count++; ex.last = now; }
+  else state.misses.push({ q, count: 1, hits: 0, first: now, last: now });
+  saveMisses();
+  renderHeader();
+  if ($("#modal-root").dataset.kind === "about") renderAbout();  // live-refresh an open queue view
+  if (normQuery($("#search").value) === q) renderSearchList();   // flip dropdown note "noted" → "queued"
+}
+function removeMiss(q){
+  state.misses = state.misses.filter(m => m.q !== q);
+  saveMisses(); renderHeader();
+  if ($("#modal-root").dataset.kind === "about") renderAbout();
+}
+function clearMisses(){
+  state.misses = []; saveMisses(); renderHeader();
+  if ($("#modal-root").dataset.kind === "about") renderAbout();
+}
+function refreshScanPrompt(){
+  const when = state.data?.updated || "unknown";
+  const items = [...state.misses].sort((a, b) => String(b.last).localeCompare(String(a.last)));
+  const lines = items.map((m, i) =>
+    `  ${String(i + 1).padStart(2, " ")}. "${m.q}"  (searched ${m.count}× · last ${fmtDate(m.last)})`).join("\n");
+  return `Player refresh scan for my AI Landscape app.
+
+Working folder: this project (ai-landscape-dash). Read AGENT.md first and follow its
+"Player refresh scan" workflow exactly. Do NOT restructure data/landscape.json's schema.
+Current landscape snapshot: ${when}.
+
+These searches returned no match in the current landscape — each is a candidate a real
+user looked for and did not find:
+
+${lines || "  (queue is empty)"}
+
+For each candidate:
+1. Identify it and its CURRENT state; it may already exist under a different name — check first.
+2. Vet against the inclusion bar in AGENT.md (real, in-scope, mainstream-recognizable here).
+3. If it clears the bar: add a schema-clean player to the right category in
+   data/landscape.json (kebab-case globally-unique id, 2-4 tags, prominence, report block
+   "none"), fetch a logo to assets/logos/<id>.png, and optionally generate its DRR report.
+4. If it does not: note the decline with a one-line reason.
+Then bump top-level "updated" and validate: python3 -m json.tool data/landscape.json > /dev/null.
+My app polls the JSON and shows new players on its next scan — do not edit index.html.`;
+}
+function downloadMisses(){
+  const payload = {
+    schema: "ai-landscape-misses/1",
+    generated: new Date().toISOString(),
+    landscape_updated: state.data?.updated || null,
+    misses: state.misses.map(m => ({ query: m.q, count: m.count, hits: m.hits, first_seen: m.first, last_seen: m.last })),
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "misses.json";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+/* ------------------------------ About & refresh modal ------------------------------ */
+function noticeHTML(){
+  const d = state.data;
+  const scan = d ? `${esc(fmtDate(d.updated))} (${esc(relTime(d.updated) || "—")})` : "unknown";
+  return `<div class="notice"><b>This is a snapshot.</b> The landscape is current only as of its
+    last scan — <b>${scan}</b> — and shaped by one curator's choices about what counts and what's
+    worth including. Treat it as a starting map, not the territory. It's built to be forked:
+    download it, rescan for what's missing, and add the players — and the learning guides — that
+    matter to your corner of the field. Searches that come up empty are queued below for exactly that.</div>`;
+}
+function openAbout(){
+  state.lastTrigger = document.activeElement;
+  toggleRepDrop(false);
+  const root = $("#modal-root");
+  root.dataset.kind = "about";
+  renderAbout();
+  root.classList.add("open");
+  root.querySelector(".m-close")?.focus();
+}
+function renderAbout(){
+  const root = $("#modal-root");
+  const misses = [...state.misses].sort((a, b) => String(b.last).localeCompare(String(a.last)));
+  const n = misses.length;
+  const rows = n
+    ? `<div class="miss-list">` + misses.map(m => `<div class="miss-row">
+        <span class="mq">${esc(m.q)}</span>
+        <span class="mc">${m.count > 1 ? "×" + m.count : ""}</span>
+        <span class="mwhen">${esc(relTime(m.last) || "just now")}</span>
+        <button class="mx" data-miss-remove="${esc(m.q)}" aria-label="Remove ${esc(m.q)} from queue" title="Remove">✕</button>
+      </div>`).join("") + `</div>`
+    : `<div class="miss-empty">No search misses queued. When a search finds nothing, the term is noted here for the next refresh scan.</div>`;
+  root.innerHTML = `<div class="backdrop" data-close-modal></div>
+    <div class="modal">
+      <button class="m-close" data-close-modal aria-label="Close">✕</button>
+      <h3>About this landscape · Refresh scan</h3>
+      ${noticeHTML()}
+      <div class="m-sub">Pending search misses${n ? ` (${n})` : ""}</div>
+      ${rows}
+      ${n ? `<div class="m-sub">Refresh-scan prompt for your agent</div>
+        <textarea readonly rows="9" spellcheck="false" aria-label="Refresh-scan prompt"></textarea>
+        <div class="m-foot">
+          <button class="btn primary" data-copy>Copy refresh-scan prompt</button>
+          <button class="btn ghost" data-miss-download>Download misses.json</button>
+          <button class="btn ghost" data-miss-clear>Clear queue</button>
+        </div>` : ``}
+    </div>`;
+  if (n) root.querySelector("textarea").value = refreshScanPrompt();
+}
+
+/* ==================================================================
+   Header (stats, subtitle, reports dropdown, theme)
+   ================================================================== */
+const INFO_ICON = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9.2"/><path d="M12 11v5.2" stroke-linecap="round"/><circle cx="12" cy="7.6" r="1.15" fill="currentColor" stroke="none"/></svg>`;
+function renderHeader(){
+  const d = state.data;
+  const nP = d.categories.reduce((s, c) => s + c.players.length, 0);
+  const nR = readyReports().length;
+  $("#sub").textContent = `last updated ${relTime(d.updated) || "—"}`;
+  const nM = state.misses.length;
+  $("#stats").innerHTML =
+    `${d.categories.length} categories · ${nP} players · <button id="rep-btn" aria-haspopup="menu" aria-expanded="false">${nR} report${nR === 1 ? "" : "s"}</button>`;
+  // queue count lives on the ⓘ button badge (which opens the same modal) — no separate stats ticker
+  $("#about-btn").innerHTML = INFO_ICON + (nM ? `<span class="qdot">${nM > 9 ? "9+" : nM}</span>` : ``);
+  renderRepDrop();
+}
+function renderRepDrop(){
+  const drop = $("#rep-drop");
+  const reps = readyReports().sort((a, b) => String(b.report.updated).localeCompare(String(a.report.updated)));
+  drop.innerHTML = reps.length
+    ? reps.map(p => {
+        const c = idx.catOf.get(p.id);
+        return `<button class="item" role="menuitem" data-go="#/report/${esc(p.id)}">
+          <span class="dot" style="background:${catColor(c.id)}"></span>
+          <span>${esc(p.name)}</span>
+          <span class="when">${esc(fmtDate(p.report.updated))}</span></button>`;
+      }).join("")
+    : `<div class="empty">No reports yet — open a player and copy its deep-research prompt to get started.</div>`;
+}
+function toggleRepDrop(force){
+  const drop = $("#rep-drop"), btn = $("#rep-btn");
+  const open = force ?? !drop.classList.contains("open");
+  drop.classList.toggle("open", open);
+  btn?.setAttribute("aria-expanded", String(open));
+  if (open && btn){
+    // #rep-drop is fixed; anchor it just below the "N reports" trigger (which now
+    // lives in the left rail), clamped on-screen so it never runs off an edge.
+    const r = btn.getBoundingClientRect(), w = 320;
+    drop.style.left = Math.max(12, Math.min(r.left, innerWidth - w - 12)) + "px";
+    drop.style.top = Math.min(r.bottom + 6, innerHeight - 60) + "px";
+  }
+}
+const THEME_ICONS = {
+  dark: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/></svg>`,
+  light: `<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 14.1A8.6 8.6 0 0 1 9.9 3.5a8.6 8.6 0 1 0 10.6 10.6Z"/></svg>`,
+};
+function applyTheme(t){
+  state.theme = t;
+  document.documentElement.dataset.theme = t;
+  const btn = $("#theme-btn");
+  btn.innerHTML = THEME_ICONS[t];  // dark shows a sun (tap → light), light shows a moon
+  btn.setAttribute("aria-label", t === "dark" ? "Switch to light theme" : "Switch to dark theme");
+  starColor = getComputedStyle(document.documentElement).getPropertyValue("--star").trim() || "#dfe4f5";
+  if (REDUCED.matches) drawStars(0, true);
+}
+
+/* ==================================================================
+   Starfield — 2 parallax layers, subtle twinkle, static under RM
+   ================================================================== */
+const starsCanvas = $("#stars"), starsCtx = starsCanvas.getContext("2d");
+let starColor = "#dfe4f5", starList = [];
+function seedStars(){
+  // deterministic PRNG so the sky is stable too (mulberry32)
+  let s = 20260716;
+  const rnd = () => { s |= 0; s = s + 0x6D2B79F5 | 0; let t = Math.imul(s ^ s >>> 15, 1 | s);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+  starList = Array.from({length:200}, (_, i) => ({
+    x:rnd(), y:rnd(),
+    layer:i < 130 ? 0 : 1,
+    r:i < 130 ? .5 + rnd()*.7 : .9 + rnd()*.9,
+    a:i < 130 ? .25 + rnd()*.2 : .4 + rnd()*.25,
+    ph:rnd()*Math.PI*2, tw:.4 + rnd()*.8,
+  }));
+}
+function sizeStars(){
+  const dpr = devicePixelRatio || 1;
+  starsCanvas.width = stage.clientWidth * dpr;
+  starsCanvas.height = stage.clientHeight * dpr;
+  starsCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  if (REDUCED.matches) drawStars(0, true);
+}
+function drawStars(t, staticDraw = false){
+  const w = stage.clientWidth, h = stage.clientHeight;
+  starsCtx.clearRect(0, 0, w, h);
+  starsCtx.fillStyle = starColor;
+  for (const st of starList){
+    const drift = staticDraw ? 0 : (st.layer === 0 ? t*1.2 : t*2.6);   // parallax: near layer drifts faster
+    const x = (st.x * w + drift) % w;
+    const alpha = staticDraw ? st.a : st.a * (.72 + .28 * Math.sin(t * st.tw + st.ph));
+    starsCtx.globalAlpha = alpha;
+    starsCtx.beginPath();
+    starsCtx.arc(x, st.y * h, st.r, 0, 7);
+    starsCtx.fill();
+  }
+  starsCtx.globalAlpha = 1;
+}
+
+/* ------------------------------ animation loop ------------------------------ */
+const RING_SPEED = [2*Math.PI/90, -2*Math.PI/120, 2*Math.PI/150];  // inner 90 s/rev, alternating
+const GALAXY_SPEED = 2*Math.PI/210;   // one full galaxy revolution ≈ 3.5 min
+let lastT = performance.now();
+function tick(now){
+  const dt = Math.min(.1, (now - lastT)/1000);
+  lastT = now;
+  if (!REDUCED.matches){
+    drawStars(now/1000);
+    // while a card is open, keep the sky moving — hover-pause only applies
+    // when nothing is open (it exists to help aim, not to freeze reading)
+    const panelUp = panel.classList.contains("open");
+    const paused = (state.hoverPause && !panelUp) || state.focusPause;
+    if (orbitLive && !paused){
+      const angles = orbitAngles.get(orbitLive.catId);
+      for (let i = 0; i < 3; i++) angles[i] += RING_SPEED[i] * dt;
+      positionOrbit(orbitLive);
+    }
+    if (galaxyLive && galaxyLive.rotatable && !paused){
+      galaxyAngle += GALAXY_SPEED * dt;
+      positionGalaxy(galaxyLive);
+    }
+  }
+  requestAnimationFrame(tick);
+}
+
+/* ==================================================================
+   Data load, 5 s polling, diff → toasts (spec §4.8)
+   ================================================================== */
+async function fetchRaw(){
+  const res = await fetch(`data/landscape.json?t=${Date.now()}`, {cache:"no-store"});
+  if (!res.ok) throw new Error(`http ${res.status}`);
+  return res.text();
+}
+function diffAndToast(oldD, newD){
+  const flat = d => {
+    const m = new Map();
+    for (const c of d.categories) for (const p of c.players) m.set(p.id, {p, cat:c});
+    return m;
+  };
+  const before = flat(oldD), after = flat(newD);
+  for (const [id, {p, cat}] of after){
+    const prev = before.get(id);
+    if (!prev){ toast("new", `✨ New in ${cat.name}: ${p.name}`); continue; }
+    const was = prev.p.report?.status, is = p.report?.status;
+    if (was !== is){
+      if (is === "in_progress") toast("warn", `🔎 Research started: ${p.name}`);
+      else if (is === "ready") toast("good", `✅ Report ready: ${p.name}`, id);
+    }
+  }
+}
+function applyData(txt, announce){
+  let parsed;
+  try { parsed = JSON.parse(txt); } catch { return; }   // agent mid-save — skip quietly
+  if (!parsed || !Array.isArray(parsed.categories)) return;
+  const old = state.data;
+  state.rawText = txt;
+  state.data = parsed;
+  buildIndex();
+  $("#boot-err").classList.remove("show");
+  if (announce && old) diffAndToast(old, parsed);
+  renderHeader();
+  // re-validate route; vanished target → galaxy + info toast
+  const hadPlayer = state.route.playerId, hadCat = state.route.catId;
+  if ((hadPlayer && !idx.players.has(hadPlayer)) || (hadCat && !idx.cats.has(hadCat) && !hadPlayer)){
+    toast("info", "That item is no longer in the landscape — back to the galaxy.");
+    state.catPanel = null;
+    go("#/");
+    return;
+  }
+  if (state.catPanel && !idx.cats.has(state.catPanel)) state.catPanel = null;
+  let prevStatus = null;
+  if (old && hadPlayer)
+    for (const c of old.categories) for (const p of c.players)
+      if (p.id === hadPlayer) prevStatus = p.report?.status;
+  render({instant:true, force:true});
+  // the "ping": open player's report just went ready → glow its report block
+  if (announce && hadPlayer && prevStatus && prevStatus !== "ready"
+      && idx.players.get(hadPlayer)?.report?.status === "ready"){
+    panel.querySelector(".report-block")?.classList.add("glow-in");
+  }
+}
+function schedulePoll(){
+  clearTimeout(state.pollTimer);
+  state.pollTimer = setTimeout(pollOnce, document.hidden ? 30000 : 5000);
+}
+async function pollOnce(){
+  try {
+    const txt = await fetchRaw();
+    if (txt !== state.rawText) applyData(txt, true);
+  } catch { /* transient (server restart) — retry silently */ }
+  schedulePoll();
+}
+
+/* ==================================================================
+   Master render — reconcile stage / panel / viewer to the route
+   ================================================================== */
+function render(opts = {}){
+  if (!state.data) return;
+  state.route = parseRoute();
+  const r = state.route;
+  const targetKey = r.view === "galaxy" ? "galaxy" : `orbit:${r.catId}`;
+  if (state.stageKey !== targetKey){
+    mountStage(targetKey, opts);
+  } else if (opts.force && stageView){
+    // in-place rebuild (data or viewport changed): badges/counts refresh,
+    // ring rotation angles persist via orbitAngles, no transition
+    const fresh = targetKey === "galaxy" ? buildGalaxy() : buildOrbit(targetKey.slice(6));
+    fresh.classList.add("z-live");
+    stageView.replaceWith(fresh);
+    stageView = fresh;
+    if (targetKey === "galaxy") orbitLive = null; else galaxyLive = null;
+  }
+  renderPanel();
+  renderViewer();
+  document.title = r.playerId ? `AI Landscape — ${idx.players.get(r.playerId).name}`
+    : r.catId ? `AI Landscape — ${idx.cats.get(r.catId).name}` : "AI Landscape";
+}
+
+/* ==================================================================
+   Events
+   ================================================================== */
+// --- stage: delegated click / keyboard / tooltip / rotation pause ---
+// shared activation (SVG elements lack .click() in Safari)
+function activateHot(hot){
+  hideTip();
+  state.hoverPause = false;        // opening something ends the aim-pause
+  state.lastTrigger = hot;
+  if (hot.dataset.catpanel){ state.catPanel = hot.dataset.catpanel; renderPanel(); return; }
+  if (hot.classList.contains("sun")){ // zoom origin = the sun's CURRENT (swirling) position
+    const m = /translate\(([-\d.e]+)[ ,]+([-\d.e]+)\)/.exec(hot.getAttribute("transform") || "");
+    if (m) state.pendingOrigin = {x:+m[1], y:+m[2]};
+  }
+  go(hot.dataset.go);
+}
+stage.addEventListener("click", e => {
+  const hot = e.target.closest("[data-go],[data-catpanel]");
+  if (hot) activateHot(hot);
+});
+stage.addEventListener("keydown", e => {
+  if (e.key !== "Enter" && e.key !== " ") return;
+  const hot = e.target.closest("[data-go],[data-catpanel]");
+  if (hot){ e.preventDefault(); activateHot(hot); }
+});
+stage.addEventListener("pointerover", e => {
+  const hot = e.target.closest("[data-tip]");
+  if (hot?.dataset.pause) state.hoverPause = true;
+  if (hot && hot.dataset.tip) showTip(hot, e);
+});
+stage.addEventListener("pointerout", e => {
+  const hot = e.target.closest("[data-tip]");
+  if (hot && !hot.contains(e.relatedTarget)){ state.hoverPause = false; hideTip(); }
+});
+stage.addEventListener("pointermove", e => moveTip(e));
+stage.addEventListener("focusin", e => {
+  // pause only for real keyboard focus (:focus-visible) — programmatic refocus
+  // after closing a panel with the mouse shouldn't freeze the rings
+  if (e.target.closest?.("[data-pause]") && e.target.matches?.(":focus-visible")) state.focusPause = true;
+});
+stage.addEventListener("focusout", e => { if (!stage.contains(e.relatedTarget) || !e.relatedTarget?.closest?.("[data-pause]")) state.focusPause = false; });
+
+function showTip(el, e){
+  if (!el.dataset.tip) return;
+  tip.textContent = el.dataset.tip;
+  tip.style.display = "block";
+  moveTip(e);
+}
+function moveTip(e){
+  if (tip.style.display !== "block") return;
+  const pad = 14, r = tip.getBoundingClientRect();
+  tip.style.left = clamp(e.clientX + pad, 8, innerWidth - r.width - 8) + "px";
+  tip.style.top = clamp(e.clientY + pad, 64, innerHeight - r.height - 8) + "px";
+}
+function hideTip(){ tip.style.display = "none"; }
+
+// --- panel ---
+panel.addEventListener("click", e => {
+  if (e.target.closest(".p-close")){ closePanelRoute(); return; }
+  const pr = e.target.closest("[data-prompt]");
+  if (pr){ openModal(pr.dataset.prompt, pr.dataset.variant); return; }
+  const or = e.target.closest("[data-open-report]");
+  if (or){ go(`#/report/${or.dataset.openReport}`); return; }
+});
+
+// --- modal ---
+$("#modal-root").addEventListener("click", e => {
+  if (e.target.closest("[data-close-modal]")) closeModal();
+  const cp = e.target.closest("[data-copy]");
+  if (cp) copyPrompt(cp);
+  const rm = e.target.closest("[data-miss-remove]");
+  if (rm){ removeMiss(rm.dataset.missRemove); return; }
+  if (e.target.closest("[data-miss-download]")) downloadMisses();
+  if (e.target.closest("[data-miss-clear]")) clearMisses();
+});
+$("#modal-root").addEventListener("keydown", e => {  // focus trap
+  if (e.key !== "Tab") return;
+  const f = [...$("#modal-root").querySelectorAll("button,textarea,[href]")];
+  if (!f.length) return;
+  const first = f[0], last = f[f.length-1];
+  if (e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+});
+
+// --- viewer ---
+$("#viewer-root").addEventListener("click", e => {
+  if (e.target.closest("[data-close-viewer]")) closeViewerRoute();
+});
+$("#viewer-root").addEventListener("keydown", e => {  // focus trap
+  if (e.key !== "Tab") return;
+  const f = [...$("#viewer-root").querySelectorAll("button,[href],iframe")];
+  if (!f.length) return;
+  const first = f[0], last = f[f.length-1];
+  if (e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+});
+
+// --- toasts ---
+$("#toasts").addEventListener("click", e => {
+  const v = e.target.closest("[data-toast-view]");
+  if (v){ dismissToast(+v.dataset.toastId); go(`#/report/${v.dataset.toastView}`); return; }
+  const x = e.target.closest("[data-toast-x]");
+  if (x) dismissToast(+x.dataset.toastX);
+});
+
+// --- header: reports dropdown, theme, delegated data-go ---
+document.addEventListener("click", e => {
+  if (e.target.closest("#about-btn") || e.target.closest("[data-open-about]")){ openAbout(); return; }
+  if (e.target.closest("#rep-btn")){ toggleRepDrop(); return; }
+  const item = e.target.closest("#rep-drop [data-go]");
+  if (item){ toggleRepDrop(false); go(item.dataset.go); return; }
+  if (!e.target.closest("#rep-drop")) toggleRepDrop(false);
+  if (!e.target.closest("#search-box")){ state.searchResults = []; state.searchSel = -1; renderSearchList(); }
+  // click-away closes the open card (same as ✕) — but never when the click is
+  // inside the card, on an interactive element (nodes switch cards), in the
+  // header/toasts, or while a modal/viewer layer sits on top
+  // (detached targets — e.g. a modal backdrop removed by its own handler on
+  // this same click — don't count as "outside the card")
+  if (panel.classList.contains("open") && e.target.isConnected
+      && !e.target.closest("#panel,#hdr,#toasts,#modal-root,#viewer-root,[data-go],[data-catpanel],a,button"))
+    closePanelRoute();
+});
+$("#theme-btn").addEventListener("click", () =>
+  applyTheme(state.theme === "dark" ? "light" : "dark"));
+
+// --- search ---
+const searchInput = $("#search");
+searchInput.addEventListener("input", () => {
+  state.searchQuery = searchInput.value;
+  state.searchSel = searchInput.value.trim() ? 0 : -1;
+  state.searchResults = runSearch(searchInput.value);
+  renderSearchList();
+  // capture a miss once the query settles (avoids queuing every keystroke while typing)
+  clearTimeout(state.missTimer);
+  const q = searchInput.value;
+  if (!state.searchResults.length && normQuery(q).length >= 2 && /[a-z0-9]/.test(q.toLowerCase()))
+    state.missTimer = setTimeout(() => recordMiss(q), 1000);
+});
+searchInput.addEventListener("keydown", e => {
+  const n = state.searchResults.length;
+  if (e.key === "ArrowDown"){ e.preventDefault(); if (n){ state.searchSel = (state.searchSel + 1) % n; renderSearchList(); } }
+  else if (e.key === "ArrowUp"){ e.preventDefault(); if (n){ state.searchSel = (state.searchSel - 1 + n) % n; renderSearchList(); } }
+  else if (e.key === "Enter"){ e.preventDefault();
+    if (!n){ clearTimeout(state.missTimer); recordMiss(searchInput.value); }   // commit the miss now
+    else searchNavigate(state.searchSel >= 0 ? state.searchSel : 0);
+  }
+  else if (e.key === "Escape"){
+    e.stopPropagation();
+    if (searchInput.value) clearSearch(false); else searchInput.blur();
+  }
+});
+$("#search-list").addEventListener("mousedown", e => {
+  const opt = e.target.closest("[data-ri]");
+  if (opt){ e.preventDefault(); searchNavigate(+opt.dataset.ri); }
+});
+
+// --- global keyboard: "/" focus, Esc unwinds layers in order ---
+document.addEventListener("keydown", e => {
+  const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName) || document.activeElement?.isContentEditable;
+  if (e.key === "/" && !typing){ e.preventDefault(); searchInput.focus(); searchInput.select(); return; }
+  if (e.key !== "Escape") return;
+  if (typing && document.activeElement === searchInput) return;      // handled by input
+  if ($("#modal-root").classList.contains("open")){ closeModal(); return; }
+  if ($("#rep-drop").classList.contains("open")){ toggleRepDrop(false); return; }
+  if ($("#viewer-root").classList.contains("open")){ closeViewerRoute(); return; }
+  if (panel.classList.contains("open")){ closePanelRoute(); return; }
+  if (state.route.view === "orbit") go("#/");
+});
+function restoreTrigger(){
+  const t = state.lastTrigger;
+  if (t && document.contains(t)) t.focus();
+  else {
+    // element was rebuilt — find it again by data attribute
+    const id = t?.dataset?.node;
+    if (id) stage.querySelector(`[data-node="${CSS.escape(id)}"]`)?.focus();
+  }
+}
+
+// --- routing / lifecycle ---
+addEventListener("hashchange", () => {
+  closeModal();
+  hideTip();
+  toggleRepDrop(false);
+  state.catPanel = null;                       // category summary panel is ephemeral
+  state.searchResults = []; state.searchSel = -1; renderSearchList();
+  const opts = state.pendingOrigin ? {origin:state.pendingOrigin} : {};
+  state.pendingOrigin = null;
+  render(opts);
+  // restore focus to the origin node when a panel closes back to orbit
+  if (state.returnFocus){
+    stage.querySelector(`[data-node="${CSS.escape(state.returnFocus)}"]`)?.focus?.();
+    state.returnFocus = null;
+  }
+});
+addEventListener("resize", () => {
+  clearTimeout(state.resizeT);
+  state.resizeT = setTimeout(() => {
+    sizeStars();
+    if (state.data) render({instant:true, force:true});
+  }, 150);
+});
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden){ clearTimeout(state.pollTimer); pollOnce(); }
+  else schedulePoll();
+});
+REDUCED.addEventListener?.("change", () => {
+  sizeStars();
+  if (state.data) render({instant:true, force:true});
+});
+setInterval(() => { if (state.data) $("#sub").textContent = `last updated ${relTime(state.data.updated) || "—"}`; }, 30000);
+
+/* ------------------------------ boot ------------------------------ */
+seedStars();
+sizeStars();
+applyTheme("dark");
+state.misses = loadMisses();               // restore the search-miss queue from localStorage
+$("#about-btn").innerHTML = INFO_ICON;      // icon shows even if data fails to load
+requestAnimationFrame(tick);
+(async () => {
+  try {
+    applyData(await fetchRaw(), false);
+    render();
+  } catch {
+    $("#boot-err").classList.add("show");   // file:// or server down
+  }
+  schedulePoll();
+})();
+</script>
+</body>
+</html>

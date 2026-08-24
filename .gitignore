@@ -1,0 +1,21 @@
+# macOS finder noise
+.DS_Store
+._*
+.AppleDouble
+.LSOverride
+.Spotlight-V100
+.Trashes
+Icon?
+
+# Editor / temp
+*.swp
+*~
+.idea/
+.vscode/
+
+# Local dev-server / logs
+*.log
+*.pid
+
+# Node (not used today; guard against future tooling)
+node_modules/

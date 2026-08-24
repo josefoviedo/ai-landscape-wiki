@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Science — Deep-Research Report · 2026-07-21</title>
+<style>
+  :root{
+    --bg:#101423; --card:#161b2e; --card2:#1a1f33;
+    --ink:#e8eaf2; --muted:#9aa0b5; --line:#262b3d; --link:#7fb3f5;
+    --accent:#b276d6; --accent-soft:rgba(178,118,214,.14);
+    --good:#0ca30c; --warn:#fab219; --bad:#d03b3b;
+    --font:Futura,"Century Gothic","Jost",system-ui,-apple-system,"Segoe UI",sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--font);font-weight:400;
+    line-height:1.55;letter-spacing:.1px;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:940px;margin:0 auto;padding:34px 26px 60px}
+  a{color:var(--link);text-decoration:none;border-bottom:1px solid rgba(127,179,245,.3)}
+  a:hover{border-bottom-color:var(--link)}
+  a:focus-visible,summary:focus-visible{outline:2px solid var(--link);outline-offset:3px;border-radius:4px}
+  h1,h2,h3{font-weight:600;letter-spacing:.4px}
+  p{margin:0 0 14px} strong,b{color:#fff;font-weight:600}
+  /* Header */
+  header{border-bottom:2px solid var(--accent);padding-bottom:18px;margin-bottom:26px}
+  .kicker{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--accent);font-weight:600}
+  h1{font-size:32px;line-height:1.08;margin:8px 0 10px;color:#fff}
+  .subline{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;font-size:13px;color:var(--muted)}
+  .pill{display:inline-flex;align-items:center;gap:7px;font-size:11px;letter-spacing:1px;text-transform:uppercase;
+    padding:4px 11px;border-radius:20px;font-weight:600;border:1px solid var(--line);color:var(--ink)}
+  .pill .dot{width:8px;height:8px;border-radius:50%;background:var(--accent)}
+  .pill.beta{background:rgba(250,178,25,.14);border-color:rgba(250,178,25,.4);color:#f6d089}
+  /* Sections */
+  section{margin:34px 0}
+  .sec-head{display:flex;align-items:baseline;gap:12px;margin-bottom:14px;border-left:4px solid var(--accent);padding-left:13px}
+  .sec-head h2{font-size:19px;color:#fff}
+  .sec-head .n{font-size:12px;color:var(--accent);font-weight:700;letter-spacing:2px}
+  .lead{font-size:14px;color:var(--muted);max-width:80ch;margin:-4px 0 15px 17px}
+  h3{font-size:15px;margin:22px 0 6px;color:var(--ink)}
+  .callout{background:var(--accent-soft);border:1px solid var(--line);border-left:3px solid var(--accent);
+    border-radius:12px;padding:15px 18px;margin:2px 0 6px;font-size:15px}
+  /* Fact vs interpretation tags */
+  .tag{display:inline-block;font-size:9.5px;font-weight:700;letter-spacing:1.1px;text-transform:uppercase;
+    padding:1px 6px;border-radius:5px;vertical-align:middle;margin-right:6px;border:1px solid var(--line);color:var(--muted)}
+  .tag.f{border-color:rgba(12,163,12,.5);color:#7fce7f}
+  .tag.i{border-color:rgba(178,118,214,.55);color:#d3aae9}
+  /* Tiles */
+  .grid{display:grid;gap:13px;margin:6px 0 4px}
+  .g4{grid-template-columns:repeat(4,1fr)} .g3{grid-template-columns:repeat(3,1fr)} .g2{grid-template-columns:repeat(2,1fr)}
+  .tile{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:15px 15px 14px;position:relative;overflow:hidden}
+  .tile .tick{position:absolute;top:0;left:0;height:100%;width:4px;background:var(--accent)}
+  .tile .big{font-size:24px;font-weight:700;color:#fff;line-height:1.05}
+  .tile .big span{font-size:14px;color:var(--muted);font-weight:600}
+  .tile .lbl{font-size:12.5px;color:var(--ink);font-weight:600;margin-top:7px}
+  .tile .sub{font-size:11.5px;color:var(--muted);margin-top:5px;line-height:1.4}
+  /* Figures / diagrams */
+  figure{margin:14px 0 18px}
+  figcaption{font-size:12px;color:var(--muted);margin-top:9px;padding-left:2px}
+  .flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:8px}
+  .node{flex:1 1 140px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 12px;min-width:130px}
+  .node .nl{font-size:10px;letter-spacing:1.4px;text-transform:uppercase;color:var(--accent);font-weight:700}
+  .node .nt{font-size:13px;color:var(--ink);margin-top:4px;font-weight:600}
+  .node .nx{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.4}
+  .arrow{align-self:center;color:var(--accent);font-size:17px;font-weight:700;padding:0 1px}
+  .ba{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+  .pane{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 15px}
+  .pane.after{border-color:rgba(178,118,214,.45)}
+  .pane .ph{font-size:10.5px;letter-spacing:1.4px;text-transform:uppercase;font-weight:700;margin-bottom:8px;color:var(--muted)}
+  .pane.after .ph{color:var(--accent)}
+  .pane ul{list-style:none;font-size:13px}
+  .pane li{padding:5px 0 5px 16px;position:relative;color:var(--ink)}
+  .pane li::before{content:"—";position:absolute;left:0;color:var(--muted)}
+  /* Lists & tables */
+  ul.clean{list-style:none;margin:2px 0 10px}
+  ul.clean li{padding:9px 0;border-bottom:1px solid var(--line);font-size:14.5px}
+  ul.clean li:last-child{border-bottom:none}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin:4px 0 6px}
+  th,td{text-align:left;padding:9px 11px;border-bottom:1px solid var(--line);vertical-align:top}
+  thead th{color:var(--ink);font-size:11px;letter-spacing:1px;text-transform:uppercase;font-weight:600;
+    background:var(--accent-soft);border-bottom:1px solid var(--accent)}
+  td.date{white-space:nowrap;color:var(--accent);font-weight:600;font-variant-numeric:tabular-nums}
+  .rel{font-weight:700;font-size:11px;letter-spacing:.5px;white-space:nowrap}
+  .rel.hi{color:var(--good)} .rel.md{color:var(--accent)} .rel.lo{color:var(--bad)}
+  .badge{display:inline-block;font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;
+    padding:2px 8px;border-radius:6px;vertical-align:middle}
+  .b-new{background:var(--good);color:#fff} .b-chg{background:var(--warn);color:#20160a}
+  .b-rum{background:transparent;color:var(--muted);border:1px solid var(--line)}
+  .note{background:var(--card2);border:1px dashed var(--line);border-radius:10px;padding:12px 15px;
+    font-size:13px;color:var(--muted);margin-top:12px}
+  code{background:var(--card2);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:12.5px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#d7dcf0;letter-spacing:0}
+  pre{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:13px 15px;overflow-x:auto;
+    white-space:pre;margin:8px 0 4px}
+  pre code{background:none;border:none;padding:0;font-size:12.5px;line-height:1.5;color:#d7dcf0}
+  details{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 15px;margin:4px 0 14px}
+  summary{cursor:pointer;font-size:13.5px;color:var(--accent);font-weight:600;letter-spacing:.3px}
+  details p{margin:10px 0 0;font-size:14px}
+  /* Quiz — CSS only, no JavaScript */
+  .q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 17px;margin:0 0 13px}
+  .qq{font-size:14.5px;color:#fff;font-weight:600;margin:0 0 11px}
+  .qn{color:var(--accent);font-weight:700;letter-spacing:1.5px;font-size:11px;margin-right:8px}
+  .opt-in{position:absolute;width:1px;height:1px;opacity:0}
+  .opt{display:block;border:1px solid var(--line);border-radius:9px;padding:9px 12px;margin:0 0 7px;
+    font-size:13.5px;cursor:pointer;background:var(--bg);color:var(--ink)}
+  .opt:hover{border-color:var(--muted)}
+  .opt-in:focus-visible + .opt{outline:2px solid var(--link);outline-offset:2px}
+  .opt-in:checked + .opt{border-color:var(--accent);background:var(--accent-soft)}
+  .fb{display:none;font-size:13px;border-radius:9px;padding:10px 12px;margin:-2px 0 9px;line-height:1.5}
+  .opt-in:checked + .opt + .fb{display:block}
+  .fb .vk{font-weight:700;letter-spacing:.6px;margin-right:6px}
+  .fb.ok{background:rgba(12,163,12,.12);border:1px solid rgba(12,163,12,.45);color:#cfe9cf}
+  .fb.ok .vk{color:#7fce7f}
+  .fb.no{background:rgba(250,178,25,.10);border:1px solid rgba(250,178,25,.4);color:#ecdcc0}
+  .fb.no .vk{color:#f6d089}
+  footer{margin-top:44px;border-top:2px solid var(--accent);padding-top:14px;font-size:11.5px;color:var(--muted);
+    display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  @media(max-width:820px){.g4,.g3{grid-template-columns:repeat(2,1fr)}.g2,.ba{grid-template-columns:1fr}
+    .wrap{padding:24px 16px 48px}h1{font-size:27px}.arrow{transform:rotate(90deg)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="kicker">AI Landscape · Deep-Research Report</div>
+    <h1>Claude Science</h1>
+    <div class="subline">
+      <span>Anthropic's AI workbench for scientists</span>
+      <span class="pill"><span class="dot"></span>AI for Life Sciences</span>
+      <span class="pill beta">Beta</span>
+      <span>Report generated 2026-07-21</span>
+    </div>
+  </header>
+
+  <!-- 01 -->
+  <section>
+    <div class="sec-head"><span class="n">01</span><h2>TL;DR</h2></div>
+    <div class="callout">
+      Claude Science, launched in beta on <b>June 30, 2026</b>, is Anthropic's science
+      workbench: one environment where a researcher can read the literature, query 60+
+      scientific databases, write and run the analysis code, drive a cluster, and produce
+      figures — without bouncing between tools. The single most important thing to
+      understand is that it is <b>not a biology model</b>. It runs the same Claude models
+      everyone else gets and wins on <em>workflow</em>: it orchestrates specialist models
+      like Boltz-2, Evo 2, and OpenFold3 through NVIDIA BioNeMo rather than competing with
+      them. Its signature claim is <b>provenance</b> — every figure ships with the code,
+      environment, and message history that made it — and a reviewer agent checks citations
+      and calculations as it works. Early users report order-of-magnitude speedups; the
+      standing caveat is that a general model orchestrating specialist tools inherits both
+      their errors and its own tendency to miss domain nuance. It carries no separate
+      price, but heavy compute bills to your own HPC or Modal account.
+    </div>
+  </section>
+
+  <!-- 02 -->
+  <section>
+    <div class="sec-head"><span class="n">02</span><h2>What it is</h2></div>
+
+    <details>
+      <summary>New to computational biology tooling? Start here (skippable)</summary>
+      <p>
+        A computational biology result is rarely one program. A typical question — "does
+        this variant change how the protein binds?" — touches a sequence database, a
+        structure predictor, a statistics environment, and a compute cluster, each with its
+        own file formats and access rituals. The friction is not any single step; it is the
+        <em>seams between them</em>, and the fact that six months later nobody can
+        reconstruct exactly which version of which script made figure 3. Claude Science is
+        an attempt to put all of those steps in one conversation that remembers what it did.
+      </p>
+    </details>
+
+    <p>
+      <span class="tag f">Fact</span>Anthropic frames Claude Science as bringing "fragmented
+      tools into a single research environment where scientists can conduct all stages of
+      their work" — literature analysis, multi-step execution, figure and manuscript
+      generation, and refinement. It runs where the researcher already works: locally on
+      macOS or Linux, or on a remote machine over <code>SSH</code> or an HPC login node, so
+      large or sensitive datasets need not leave the systems they already live on; only the
+      context each step needs is sent to Claude.
+    </p>
+    <p>
+      <span class="tag i">Reading</span>The strategic shape is familiar: this is the same
+      move Anthropic made with Claude Code, aimed at a different profession. Rather than
+      shipping a better protein model, it is trying to own the <em>operating layer</em>
+      where scientific work actually happens — a bet on workflow rather than on a new model,
+      as TechCrunch put it at launch.
+    </p>
+
+    <figure>
+      <div class="ba">
+        <div class="pane">
+          <div class="ph">Without it — the seams</div>
+          <ul>
+            <li>Literature in one tab, data in another, code in a third</li>
+            <li>Each database with its own schema and access ritual</li>
+            <li>Cluster jobs hand-written and hand-submitted</li>
+            <li>Figure provenance lost within weeks</li>
+            <li>Context re-established every session</li>
+          </ul>
+        </div>
+        <div class="pane after">
+          <div class="ph">With it — one session</div>
+          <ul>
+            <li>One agent spanning literature, data, and code</li>
+            <li>60+ databases behind curated connectors</li>
+            <li>Jobs drafted, reviewed, then submitted for you</li>
+            <li>Every figure carries its code and environment</li>
+            <li>Datasets loaded once, held in session memory</li>
+          </ul>
+        </div>
+      </div>
+      <figcaption><b>Figure 1.</b> The problem Claude Science targets is the seams between tools, not any single tool. Left: the status quo, where context and provenance leak at every boundary. Right: a single session that retains both.</figcaption>
+    </figure>
+  </section>
+
+  <!-- 03 -->
+  <section>
+    <div class="sec-head"><span class="n">03</span><h2>Product &amp; technology</h2></div>
+    <p class="lead">The mental model first: a generalist coordinating agent that can hire specialists, call real scientific tools, and submit real compute jobs — then check its own work.</p>
+
+    <p>
+      You talk to one <b>coordinating agent</b>. It has access to 60+ curated skills and
+      connectors and can spin up sub-agents for specialist tasks. A request in plain
+      language becomes a plan, then code, then — if the job is heavy — a submitted cluster
+      job, then a figure with its provenance attached.
+    </p>
+
+    <pre><code>You:  "Does the R273H variant change predicted binding for these 40 ligands?"
+      → agent drafts a plan, asks before reaching new resources
+      → pulls structures (PDB) + variant annotation (ClinVar)
+      → calls Boltz-2 via BioNeMo for affinity prediction
+      → submits the sweep to your HPC over SSH
+      → returns a figure + the exact code and environment that made it</code></pre>
+
+    <figure>
+      <div class="flow">
+        <div class="node"><div class="nl">Ask</div><div class="nt">Plain language</div><div class="nx">e.g. "compare binding across 40 ligands"</div></div>
+        <span class="arrow">→</span>
+        <div class="node"><div class="nl">Coordinate</div><div class="nt">Generalist agent</div><div class="nx">plans, asks before new resources</div></div>
+        <span class="arrow">→</span>
+        <div class="node"><div class="nl">Reach</div><div class="nt">Skills &amp; connectors</div><div class="nx">60+ DBs: PDB, UniProt, ClinVar, GEO…</div></div>
+        <span class="arrow">→</span>
+        <div class="node"><div class="nl">Compute</div><div class="nt">HPC or Modal</div><div class="nx">1 → hundreds of GPUs</div></div>
+        <span class="arrow">→</span>
+        <div class="node"><div class="nl">Check</div><div class="nt">Reviewer agent</div><div class="nx">citations, calculations, figure↔code</div></div>
+        <span class="arrow">→</span>
+        <div class="node"><div class="nl">Emit</div><div class="nt">Artifact</div><div class="nx">figure + code + env + history</div></div>
+      </div>
+      <figcaption><b>Figure 2.</b> One pass through a Claude Science session. The two steps that distinguish it from a chat window are <em>Compute</em> (it submits real jobs to infrastructure you already own) and <em>Check</em> (an actor-critic reviewer inspects the output before you see it).</figcaption>
+    </figure>
+
+    <h3>Reproducible, richly rendered artifacts</h3>
+    <p>
+      <span class="tag f">Fact</span>Claude Science renders scientific objects natively — 3D
+      protein structures, genome-browser tracks, chemical structures — and emits figures
+      alongside the code that created them: the exact code and environment, a plain-language
+      description of how it was made, and the full message history. Figures can be edited in
+      plain language ("log scale that axis") and the agent rewrites its own code. A separate
+      <b>reviewer agent</b> inspects outputs for wrong citations, untraceable numbers, and
+      figures that disagree with their code. Beta users asked for a "replication" button to
+      re-check results skeptically; adding it measurably improved accuracy.
+    </p>
+
+    <h3>Compute management</h3>
+    <p>
+      <span class="tag f">Fact</span>For heavy work the agent drafts a plan, asks before
+      reaching new resources, then writes and submits jobs to your own HPC cluster over SSH
+      or to a Modal account for on-demand GPUs, scaling "from a single GPU to hundreds as
+      needed." Because the session holds context in memory, large datasets load once, and a
+      session can be forked to compare two approaches without losing the original thread.
+    </p>
+
+    <h3>What it runs on</h3>
+    <p>
+      <span class="tag f">Fact</span>It uses the same Claude models available to everyone —
+      including Claude Opus 4.8 — with no special access or gating. Domain power comes from
+      the surrounding scaffolding, not a private model: 60+ databases, plus NVIDIA's
+      <b>BioNeMo Agent Toolkit</b>, which connects it natively to BioNeMo's life-science
+      models including <b>Evo 2, Boltz-2, and OpenFold3</b>. Labs can save their own
+      pipelines as reusable skills that later sessions inherit.
+    </p>
+  </section>
+
+  <!-- 04 -->
+  <section>
+    <div class="sec-head"><span class="n">04</span><h2>Market position</h2></div>
+    <p class="lead">Claude Science sits one layer above most of its category siblings. Several of them are dependencies, not rivals.</p>
+
+    <p>
+      AlphaFold, Boltz, RFdiffusion (Baker Lab), EvolutionaryScale's ESM3, AlphaGenome, and
+      Arc Institute's Evo 2 are <b>specialized predictive or generative models</b> — they
+      fold proteins, design binders, read genomes. Claude Science does none of that itself.
+      It decides <em>which</em> model to run, prepares the data, executes the code, and
+      interprets the result. Through BioNeMo it literally invokes Evo 2, Boltz-2, and
+      OpenFold3 — so <b>NVIDIA BioNeMo</b> is both sibling and substrate.
+    </p>
+
+    <figure>
+      <table>
+        <thead><tr><th>Layer</th><th>Examples</th><th>What it actually does</th></tr></thead>
+        <tbody>
+          <tr><td><b>Orchestration</b></td><td>Claude Science · Gemini Co-Scientist · OpenAI Prism</td><td>Plans, calls tools, runs code, manages compute, interprets, records provenance</td></tr>
+          <tr><td><b>Platform</b></td><td>NVIDIA BioNeMo</td><td>Packages and serves the specialist models; supplies the agent toolkit</td></tr>
+          <tr><td><b>Specialist models</b></td><td>AlphaFold · Boltz-2 · ESM3 · Evo 2 · AlphaGenome · RFdiffusion</td><td>Make the actual scientific predictions and designs</td></tr>
+        </tbody>
+      </table>
+      <figcaption><b>Figure 3.</b> Why "Claude Science vs AlphaFold" is the wrong comparison: they occupy different layers. Claude Science's real competition is the orchestration row — Google's Gemini for Science and OpenAI's Prism — while the bottom row is what it calls.</figcaption>
+    </figure>
+
+    <p>
+      <span class="tag i">Reading</span>Differentiation rests on three things rivals find hard
+      to match at once: first-class provenance, execution on the lab's <b>own
+      infrastructure</b> (so data governance stays intact), and compute management spanning a
+      laptop to a cluster. Traction so far is anecdotal but specific:
+    </p>
+    <div class="grid g3">
+      <div class="tile"><span class="tick"></span><div class="big">~10</div><div class="lbl">100+ page reviews</div><div class="sub">Allen Institute team via a ~20-skill review template — work that previously took up to 2 years each.</div></div>
+      <div class="tile"><span class="tick"></span><div class="big">~1/10</div><div class="lbl">the time</div><div class="sub">UCSF glioma germline analysis; results independently validated by the group.</div></div>
+      <div class="tile"><span class="tick"></span><div class="big">~$26</div><div class="lbl">to map a field</div><div class="sub">A Forbes reviewer's usage cost for an exploratory literature map.</div></div>
+    </div>
+  </section>
+
+  <!-- 05 -->
+  <section>
+    <div class="sec-head"><span class="n">05</span><h2>Business</h2></div>
+    <p>
+      Claude Science is a product of <b>Anthropic PBC</b>. Notably, the pricing model folds
+      it into existing paid plans rather than charging for it separately — consistent with
+      the "own the operating layer" strategy rather than a per-seat science SKU.
+    </p>
+    <div class="grid g4">
+      <div class="tile"><span class="tick"></span><div class="big">$965B</div><div class="lbl">Post-money valuation</div><div class="sub">Series H, May 2026 (Altimeter, Dragoneer, Greenoaks, Sequoia).</div></div>
+      <div class="tile"><span class="tick"></span><div class="big">$65B</div><div class="lbl">Series H raise</div><div class="sub">~$125B total to date; filed confidentially for IPO Jun 1, 2026.</div></div>
+      <div class="tile"><span class="tick"></span><div class="big">~$47B <span>est.</span></div><div class="lbl">Annualized revenue</div><div class="sub">Third-party estimate (Sacra), May 2026 — directional, not audited.</div></div>
+      <div class="tile"><span class="tick"></span><div class="big">$0 <span>extra</span></div><div class="lbl">Price of Claude Science</div><div class="sub">Bundled into paid plans; compute billed separately.</div></div>
+    </div>
+    <h3>Pricing &amp; access</h3>
+    <p>
+      <span class="tag f">Fact</span>The beta ships to <b>Pro</b> (~$20/mo), <b>Max</b> (from
+      $100/mo, 5× and 20× tiers at $100/$200), <b>Team</b> (~$25/seat Standard, $125 Premium,
+      five-seat minimum) and <b>Enterprise</b> (custom); not on the free plan. The caveat
+      that matters operationally: <b>compute is yours</b> — heavy jobs run on your HPC or
+      Modal account. Anthropic is seeding adoption with a discounted Team plan for research
+      labs and an "AI for Science" program funding up to 50 projects with up to
+      <b>$30,000 in credits</b> each (plus up to $2,000 of Modal compute).
+    </p>
+  </section>
+
+  <!-- 06 -->
+  <section>
+    <div class="sec-head"><span class="n">06</span><h2>Recent developments</h2></div>
+    <table>
+      <thead><tr><th>Date</th><th>Development</th></tr></thead>
+      <tbody>
+        <tr><td class="date">Fall 2025</td><td>Anthropic begins its life-sciences effort — model capability work plus scientific-ecosystem connections via MCP and skills.</td></tr>
+        <tr><td class="date">Early–mid 2026</td><td>Private beta with Manifold Bio, the Allen Institute, and UCSF across single-cell RNA-seq, CRISPR-screen design, structure prediction, cheminformatics.</td></tr>
+        <tr><td class="date">May 2026</td><td>$65B Series H closes at a $965B post-money valuation.</td></tr>
+        <tr><td class="date">Jun 1, 2026</td><td>Anthropic files confidentially for an IPO.</td></tr>
+        <tr><td class="date">Jun 2026</td><td>NVIDIA launches the BioNeMo Agent Toolkit — the connective tissue Claude Science uses for Evo 2, Boltz-2, OpenFold3.</td></tr>
+        <tr><td class="date">Jun 30, 2026</td><td>Claude Science launches in beta (macOS/Linux) across Pro, Max, Team, Enterprise, with a discounted research-labs Team plan and the AI-for-Science grants. <span class="badge b-new">Launch</span></td></tr>
+        <tr><td class="date">Jul 2026</td><td>Trade press reports Anthropic positioning Claude Science for biopharma and beginning its own internal drug programs. <span class="badge b-rum">Single-source</span></td></tr>
+        <tr><td class="date">Jul 15, 2026</td><td>AI-for-Science applications close; awards by Jul 31; funded projects run Sep 1 – Dec 1, 2026.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 07 -->
+  <section>
+    <div class="sec-head"><span class="n">07</span><h2>Risks &amp; limitations</h2></div>
+    <p class="lead">Where this is genuinely weak, assumed, or unresolved — not a caveat ritual.</p>
+    <ul class="clean">
+      <li><b>Hallucination is not solved, and Anthropic says so.</b> It frames creativity and hallucination as related products of probabilistic reasoning, unlikely to disappear entirely. The reviewer agent reduces the rate; it does not make outputs trustworthy by default.</li>
+      <li><b>The reviewer checks form, not biology.</b> It validates citations, calculations, and figure↔code agreement — none of which catches a scientifically wrong-but-internally-consistent result.</li>
+      <li><b>Orchestration inherits its models' errors.</b> Predictions come from Evo 2, Boltz-2, OpenFold3 and friends. If a specialist model is systematically wrong for your ligand class, Claude Science will confidently carry that error downstream.</li>
+      <li><b>Reproducibility ≠ correctness.</b> Provenance makes a result auditable, which is genuinely valuable and genuinely not the same as right — as the UCSF group implied by independently validating their output.</li>
+      <li><b>Domain nuance in regulated work.</b> Scientists at launch warned a general model can miss nuance in regulatory guidance or assay design; pharma buyers want measurable error rates, validation protocols, and defined human decision rights before trusting it in a submission path.</li>
+      <li><b>Beta, platform, and cost edges.</b> Beta software; macOS/Linux only (no Windows); Team/Enterprise needs admin enablement; serious compute bills to your own budget, so the marginal cost of a sloppy sweep is real.</li>
+      <li><b>Governance is unsettled.</b> If this becomes an operating layer for research, the institutions defining evidence, licensing, and integrity standards around it matter as much as the software — and they do not exist yet.</li>
+    </ul>
+    <div class="note">
+      <b>Bottom line for a genomics or bioinformatics lab:</b> adopt it as the coordinating
+      layer that drives AlphaFold-class tools, not as a replacement for them, and treat its
+      outputs as fast, auditable drafts that still need your validation step. The failure
+      mode to guard against is not obvious nonsense — it is a well-formatted, fully
+      reproducible, confidently wrong figure.
+    </div>
+  </section>
+
+  <!-- 08 -->
+  <section>
+    <div class="sec-head"><span class="n">08</span><h2>Check your understanding</h2></div>
+    <p class="lead">Five questions on behavior and trade-offs. Select an option to see whether it's right and why.</p>
+
+    <div class="q">
+      <p class="qq"><span class="qn">Q1</span> A structural biologist asks Claude Science to predict a protein's 3D structure. What actually produces the prediction?</p>
+      <input type="radio" name="q1" id="q1a" class="opt-in"><label for="q1a" class="opt">Claude generates the atomic coordinates directly from what it learned in training.</label>
+      <div class="fb no"><span class="vk">Not quite —</span> this is the most common misread of the product. The language model plans and interprets; it does not fold proteins. Structure prediction is a specialist task it delegates.</div>
+      <input type="radio" name="q1" id="q1b" class="opt-in"><label for="q1b" class="opt">It fine-tunes a private copy of AlphaFold on the lab's own data first.</label>
+      <div class="fb no"><span class="vk">Not quite —</span> there is no per-lab fine-tuning step. It runs the same public Claude models with no special gating, and calls existing specialist models as they are.</div>
+      <input type="radio" name="q1" id="q1c" class="opt-in"><label for="q1c" class="opt">It calls a specialist model such as Boltz-2 or OpenFold3 through BioNeMo, then interprets the result.</label>
+      <div class="fb ok"><span class="vk">Correct —</span> this is the orchestration model. Claude Science plans the work, prepares inputs, invokes the specialist model via the BioNeMo toolkit, and explains the output. Predictive accuracy belongs to that specialist model, not to Claude.</div>
+      <input type="radio" name="q1" id="q1d" class="opt-in"><label for="q1d" class="opt">The reviewer agent derives the structure while checking the main agent's work.</label>
+      <div class="fb no"><span class="vk">Not quite —</span> the reviewer agent is a critic, not a predictor. It checks citations, calculations, and whether figures match their code.</div>
+    </div>
+
+    <div class="q">
+      <p class="qq"><span class="qn">Q2</span> A lab's consent terms forbid raw patient data from leaving its own cluster. What does Claude Science's design allow?</p>
+      <input type="radio" name="q2" id="q2a" class="opt-in"><label for="q2a" class="opt">Run the session against their own HPC over SSH, so the data never leaves the cluster.</label>
+      <div class="fb ok"><span class="vk">Correct —</span> it runs where the researcher already works: locally, or on a remote machine over SSH or an HPC login node. That placement is precisely what keeps governed datasets inside the institution's boundary.</div>
+      <input type="radio" name="q2" id="q2b" class="opt-in"><label for="q2b" class="opt">Upload the dataset to Anthropic once per session, then have it deleted afterward.</label>
+      <div class="fb no"><span class="vk">Not quite —</span> a retention promise would not satisfy a consent term that forbids the data leaving at all. The design avoids the transfer rather than managing it.</div>
+      <input type="radio" name="q2" id="q2c" class="opt-in"><label for="q2c" class="opt">Route the work through Modal, which is exempt because its compute is ephemeral.</label>
+      <div class="fb no"><span class="vk">Not quite —</span> Modal is an on-demand GPU option, not a compliance carve-out. Ephemeral compute is still compute outside your cluster.</div>
+      <input type="radio" name="q2" id="q2d" class="opt-in"><label for="q2d" class="opt">Nothing — the workbench requires uploading data to Anthropic before it can analyze it.</label>
+      <div class="fb no"><span class="vk">Not quite —</span> this is the assumption the product is built to avoid; local and SSH/HPC execution is a headline capability.</div>
+    </div>
+
+    <div class="q">
+      <p class="qq"><span class="qn">Q3</span> Six months on, a reviewer asks how a figure in your manuscript was produced. What does Claude Science attach to that figure?</p>
+      <input type="radio" name="q3" id="q3a" class="opt-in"><label for="q3a" class="opt">The random seed and the model version used when it was rendered.</label>
+      <div class="fb no"><span class="vk">Not quite —</span> a seed and version pin the model call, but not the analysis around it — which is where most irreproducibility actually lives.</div>
+      <input type="radio" name="q3" id="q3b" class="opt-in"><label for="q3b" class="opt">A DOI minted for the figure at export time.</label>
+      <div class="fb no"><span class="vk">Not quite —</span> a DOI is an identifier, not a method record. It tells you where a figure lives, not how it was made.</div>
+      <input type="radio" name="q3" id="q3c" class="opt-in"><label for="q3c" class="opt">A cryptographic hash of the dataset the figure was drawn from.</label>
+      <div class="fb no"><span class="vk">Not quite —</span> a hash fixes the input but says nothing about the transformation applied to it.</div>
+      <input type="radio" name="q3" id="q3d" class="opt-in"><label for="q3d" class="opt">The exact code and environment that made it, plus the full message history.</label>
+      <div class="fb ok"><span class="vk">Correct —</span> this bundle is the product's signature claim, and the reason its output is auditable. Note the limit: auditable means someone can retrace the work, not that the science is right.</div>
+    </div>
+
+    <div class="q">
+      <p class="qq"><span class="qn">Q4</span> Suppose Boltz-2 systematically mispredicts binding affinity for one ligand class. What happens to a Claude Science analysis that leans on it?</p>
+      <input type="radio" name="q4" id="q4a" class="opt-in"><label for="q4a" class="opt">The reviewer agent catches it by validating the numbers against the literature.</label>
+      <div class="fb no"><span class="vk">Not quite —</span> the reviewer checks internal consistency — citations, calculations, figure↔code agreement. A plausible number from a miscalibrated model passes all of those checks.</div>
+      <input type="radio" name="q4" id="q4b" class="opt-in"><label for="q4b" class="opt">The error propagates — orchestration coordinates specialist models, it does not improve their accuracy.</label>
+      <div class="fb ok"><span class="vk">Correct —</span> this is the structural limit of the layer. Claude Science's scientific ceiling is set by the tools it calls, which is why an independent validation step still belongs in your workflow.</div>
+      <input type="radio" name="q4" id="q4c" class="opt-in"><label for="q4c" class="opt">It automatically falls back to a second model and flags the disagreement for you.</label>
+      <div class="fb no"><span class="vk">Not quite —</span> nothing documented promises automatic cross-model arbitration. You can ask for a second method, but that is your experimental design, not a built-in guarantee.</div>
+      <input type="radio" name="q4" id="q4d" class="opt-in"><label for="q4d" class="opt">Nothing meaningful, because the provenance trail makes the result reproducible.</label>
+      <div class="fb no"><span class="vk">Not quite —</span> this conflates reproducibility with correctness. A reproducible pipeline reproduces the same wrong answer perfectly.</div>
+    </div>
+
+    <div class="q">
+      <p class="qq"><span class="qn">Q5</span> Your lab is on a Claude Team plan and runs a week-long pipeline across hundreds of GPUs. How is that billed?</p>
+      <input type="radio" name="q5" id="q5a" class="opt-in"><label for="q5a" class="opt">Nothing extra — heavy compute is covered by the Team seat price.</label>
+      <div class="fb no"><span class="vk">Not quite —</span> the seat covers the workbench, not the cluster. Treating GPU time as free is the fastest way to a surprise invoice.</div>
+      <input type="radio" name="q5" id="q5b" class="opt-in"><label for="q5b" class="opt">Anthropic adds a per-job compute surcharge on top of the seat price.</label>
+      <div class="fb no"><span class="vk">Not quite —</span> Anthropic does not meter your cluster. The billing relationship for compute is not with them.</div>
+      <input type="radio" name="q5" id="q5c" class="opt-in"><label for="q5c" class="opt">The workbench is bundled in the plan, but GPU time bills to your own HPC or Modal account.</label>
+      <div class="fb ok"><span class="vk">Correct —</span> Claude Science has no separate price; it submits jobs to infrastructure you already pay for. Budget the compute separately from the subscription.</div>
+      <input type="radio" name="q5" id="q5d" class="opt-in"><label for="q5d" class="opt">It is blocked — Team plans cap analyses at a single GPU.</label>
+      <div class="fb no"><span class="vk">Not quite —</span> scaling from one GPU to hundreds is an advertised capability; the constraint is your compute budget, not a plan cap.</div>
+    </div>
+  </section>
+
+  <!-- 09 -->
+  <section>
+    <div class="sec-head"><span class="n">09</span><h2>Sources &amp; reliability</h2></div>
+    <table>
+      <thead><tr><th>Source</th><th>Item</th><th>Reliability</th></tr></thead>
+      <tbody>
+        <tr><td><a href="https://www.anthropic.com/news/claude-science-ai-workbench">Anthropic (official)</a></td><td>Launch, skills/connectors, provenance, reviewer agent, compute, BioNeMo models, beta users, grants — primary source</td><td class="rel hi">High</td></tr>
+        <tr><td><a href="https://claude.com/product/claude-science">Claude — product page</a></td><td>Positioning &amp; access</td><td class="rel hi">High</td></tr>
+        <tr><td><a href="https://techcrunch.com/2026/06/30/anthropics-claude-science-bets-on-workflow-not-a-new-model-to-win-over-scientists/">TechCrunch (Jun 30, 2026)</a></td><td>"Workflow, not a new model"; same public Claude models, no gating</td><td class="rel hi">High</td></tr>
+        <tr><td><a href="https://www.hpcwire.com/aiwire/2026/06/30/anthropic-launches-claude-science-ai-workbench-for-scientific-research/">HPCwire / AIwire</a></td><td>"Replication button" and accuracy improvement</td><td class="rel md">Med</td></tr>
+        <tr><td><a href="https://news.northeastern.edu/2026/06/30/anthropic-claude-science-launch/">Northeastern Global News</a></td><td>Scientist reactions; regulatory-nuance caveats</td><td class="rel md">Med</td></tr>
+        <tr><td><a href="https://www.the-scientist.com/early-verdicts-on-claude-science-faster-workflows-but-gaps-remain-74745">The Scientist</a></td><td>Early verdicts; governance/standards gap</td><td class="rel md">Med</td></tr>
+        <tr><td><a href="https://www.forbes.com/sites/johndrake/2026/06/30/anthropics-new-ai-workbench-mapped-my-field-for-26-now-imagine-it-aimed-at-the-rest-of-science/">Forbes (J. Drake)</a></td><td>"$26 to map a field" hands-on review</td><td class="rel md">Med</td></tr>
+        <tr><td><a href="https://www.marktechpost.com/2026/07/04/anthropic-launches-claude-science-beta/">MarkTechPost</a></td><td>60+ databases; multi-agent structure</td><td class="rel md">Med</td></tr>
+        <tr><td><a href="https://www.artificialintelligence-news.com/news/nvidia-bionemo-accelerates-anthropic-claude-science/">AI News</a></td><td>BioNeMo Agent Toolkit integration</td><td class="rel md">Med</td></tr>
+        <tr><td><a href="https://endpoints.news/anthropic-debuts-claude-science-an-ai-product-for-bioscience/">Endpoints News</a></td><td>Biopharma positioning; internal drug programs</td><td class="rel lo">Low · single-source</td></tr>
+        <tr><td><a href="https://sacra.com/c/anthropic/">Sacra</a></td><td>Revenue / valuation estimates</td><td class="rel lo">Low · estimate</td></tr>
+        <tr><td><a href="https://www.anthropic.com/news">Anthropic newsroom</a></td><td>Series H — $65B raise, $965B post-money</td><td class="rel hi">High</td></tr>
+      </tbody>
+    </table>
+    <div class="note">
+      <b>Reliability key</b> — <b class="rel hi">High</b>: official company posts and tier-1 press.
+      <b class="rel md">Med</b>: reputable trade press, often single-source. <b class="rel lo">Low</b>:
+      single-source reporting or third-party estimates, directional only. All sources accessed
+      <b>2026-07-21</b>. Quotations are brief and attributed; claims marked
+      <span class="tag i">Reading</span> are this report's interpretation, not the sources' words.
+    </div>
+  </section>
+
+  <footer>
+    <span>AI Landscape · Deep-Research Report · <b>Claude Science</b> · AI for Life Sciences</span>
+    <span>Generated 2026-07-21 · estimates flagged inline · primary source: Anthropic</span>
+  </footer>
+
+</div>
+</body>
+</html>
