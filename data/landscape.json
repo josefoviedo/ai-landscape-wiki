@@ -2,7 +2,7 @@
   "schema": 1,
   "name": "AI Landscape",
   "description": "Interactive map of the AI tooling landscape: categories as systems, players in orbit.",
-  "updated": "2026-08-24T15:19:43Z",
+  "updated": "2026-08-24T15:29:02Z",
   "categories": [
     {
       "id": "foundation-models",
@@ -4309,8 +4309,8 @@
     },
     {
       "id": "model-harnesses",
-      "name": "Model Harnesses",
-      "pls": "A harness is the runtime scaffold wrapped around a model — the agentic loop that calls the model, runs tools, manages memory and context, and keeps going until the job is done. Unlike IDE-bound coding agents or the SDKs you build with, these are ready-to-run, model-agnostic (bring-your-own-key) programs you host yourself. The flagship coding agents Claude Code and OpenAI Codex are themselves harnesses, but this map keeps them under Coding Agents by their primary identity; the tools here lead with the harness itself.",
+      "name": "Model Harnesses and Orchestration",
+      "pls": "Two layers of the run-your-agent stack. A harness is the runtime scaffold around a single model — the agentic loop that calls the model, runs tools, and manages memory until the job is done; unlike IDE-bound coding agents or the SDKs you build with, these are ready-to-run, model-agnostic (bring-your-own-key) programs you host yourself. (Claude Code and Codex are harnesses too, but sit under Coding Agents by primary identity.) Above them sits orchestration: control planes that run whole fleets of agents in parallel — isolated worktrees, org charts, budgets, and review flows — driving those harnesses as their workers.",
       "players": [
         {
           "id": "openclaw",
@@ -4426,11 +4426,30 @@
           }
         },
         {
+          "id": "swe-agent",
+          "name": "SWE-agent",
+          "tagline": "Princeton's research harness for GitHub issues",
+          "pls": "The academic harness from the Princeton and Stanford team behind SWE-bench: SWE-agent takes a GitHub issue and fixes it with the language model of your choice, and is a standard research baseline (it also tackles cybersecurity and competitive-coding tasks). Its 100-line spin-off, mini-swe-agent — bash as the only tool — scores above 74% on SWE-bench Verified and is used by Meta, NVIDIA, and IBM as a benchmarking harness.",
+          "url": "https://github.com/SWE-agent/SWE-agent",
+          "tags": [
+            "harness",
+            "open-source",
+            "research",
+            "benchmark"
+          ],
+          "prominence": 1,
+          "report": {
+            "status": "none",
+            "path": null,
+            "updated": null
+          }
+        },
+        {
           "id": "paperclip",
           "name": "Paperclip",
           "tagline": "Open-source orchestration for zero-human companies",
           "pls": "Not a harness itself but the layer above them: Paperclip is an open-source, self-hosted platform that runs fleets of agents as an org chart — roles, budgets, tickets, heartbeats, an immutable audit log, and hard budget caps that auto-pause at 100%. It drives the harnesses in this category (Claude, Codex, Hermes, OpenClaw, Pi, OpenCode, and more) as its 'employees.' From pseudonymous dev @dotta, MIT-licensed, it passed roughly 70,000 GitHub stars by mid-2026.",
-          "url": "https://github.com/agencyenterprise/paperclip-ai",
+          "url": "https://paperclipai.net",
           "tags": [
             "orchestration",
             "multi-agent",
@@ -4445,16 +4464,54 @@
           }
         },
         {
-          "id": "swe-agent",
-          "name": "SWE-agent",
-          "tagline": "Princeton's research harness for GitHub issues",
-          "pls": "The academic harness from the Princeton and Stanford team behind SWE-bench: SWE-agent takes a GitHub issue and fixes it with the language model of your choice, and is a standard research baseline (it also tackles cybersecurity and competitive-coding tasks). Its 100-line spin-off, mini-swe-agent — bash as the only tool — scores above 74% on SWE-bench Verified and is used by Meta, NVIDIA, and IBM as a benchmarking harness.",
-          "url": "https://github.com/SWE-agent/SWE-agent",
+          "id": "conductor",
+          "name": "Conductor",
+          "tagline": "Run a team of coding agents on your Mac",
+          "pls": "Melty Labs' Mac app for running a fleet of Claude Code and Codex agents in parallel, each in its own isolated git worktree, with checkpoints to roll back, Spotlight sync-back testing, and a multi-model mode that pits Claude and Codex on the same prompt. You review and merge their diffs from one control plane. It's free — bring your own Claude or Codex subscription — and is used by engineering teams at Linear, Vercel, Notion, and Stripe.",
+          "url": "https://conductor.build",
           "tags": [
-            "harness",
+            "orchestration",
+            "coding",
+            "parallel",
+            "macos"
+          ],
+          "prominence": 2,
+          "report": {
+            "status": "none",
+            "path": null,
+            "updated": null
+          }
+        },
+        {
+          "id": "orca",
+          "name": "Orca",
+          "tagline": "The agent development environment for fleets",
+          "pls": "Stably AI's open-source 'agent development environment' (ADE): one control plane that spins up Claude Code, Codex, OpenCode, Goose, and 27+ CLI agents side by side, each in an isolated git worktree, with editors, terminals, GitHub/Linear task flows, and browser previews in a single desktop app (plus phone companions and a headless serve mode). MIT-licensed and built on Electron, it drew roughly 43,000 GitHub stars within months of its March 2026 launch.",
+          "url": "https://onorca.dev",
+          "tags": [
+            "orchestration",
             "open-source",
-            "research",
-            "benchmark"
+            "coding",
+            "ade"
+          ],
+          "prominence": 2,
+          "report": {
+            "status": "none",
+            "path": null,
+            "updated": null
+          }
+        },
+        {
+          "id": "claude-squad",
+          "name": "Claude Squad",
+          "tagline": "Terminal manager for parallel coding agents",
+          "pls": "An open-source, terminal-first manager for running several coding agents at once — Claude Code, Codex, OpenCode, or Aider — each in its own tmux session and git worktree, all within one TUI. It's the quickest way from zero to parallel agents without leaving the shell: opinionated, lightweight, and a leaner alternative to the graphical fleet orchestrators. Popular with developers who prefer to keep everything in the terminal.",
+          "url": "https://github.com/smtg-ai/claude-squad",
+          "tags": [
+            "orchestration",
+            "open-source",
+            "cli",
+            "parallel"
           ],
           "prominence": 1,
           "report": {
