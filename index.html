@@ -411,7 +411,7 @@ g.hot:focus-visible .focus-ring{opacity:1}
   <div class="card">
     <div class="rocket">🛰️</div>
     <p>Open me via <b>./run.command</b> — I need a local server to load data.</p>
-    <p class="small">Browsers block data loading from file:// pages. Double-click run.command (or run ./run.sh) in the ai-landscape-dash folder, then visit http://localhost:8787.</p>
+    <p class="small">Browsers block data loading from file:// pages. Double-click run.command (or run ./run.sh) in the ai-landscape-wiki folder, then visit http://localhost:8787.</p>
   </div>
 </div>
 
@@ -1006,7 +1006,7 @@ function promptText(p, variant){
   const today = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
   return `${variant} a deep-research report for my AI Landscape app.
 
-Working folder: this project (ai-landscape-dash). Read AGENT.md first and follow
+Working folder: this project (ai-landscape-wiki). Read AGENT.md first and follow
 its DRR workflow and report style contract exactly.
 
 Subject: ${p.name} (${p.url})
@@ -1291,7 +1291,7 @@ function refreshScanPrompt(){
     `  ${String(i + 1).padStart(2, " ")}. "${m.q}"  (searched ${m.count}× · last ${fmtDate(m.last)})`).join("\n");
   return `Player refresh scan for my AI Landscape app.
 
-Working folder: this project (ai-landscape-dash). Read AGENT.md first and follow its
+Working folder: this project (ai-landscape-wiki). Read AGENT.md first and follow its
 "Player refresh scan" workflow exactly. Do NOT restructure data/landscape.json's schema.
 Current landscape snapshot: ${when}.
 

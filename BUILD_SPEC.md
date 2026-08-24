@@ -32,7 +32,7 @@ Read this whole file before writing code. `AGENT.md` (the update contract) and
 ## 2. Files (final state)
 
 ```
-ai-landscape-dash/
+ai-landscape-wiki/
   index.html            ← you build this (the entire app)
   data/landscape.json   ← provided; app reads + polls it
   reports/              ← DRR HTML files land here (provided, empty)
@@ -164,7 +164,7 @@ the category, comma-separated; `{{DATE}}` = today, `{{VARIANT}}` = "Create" or
 ```
 {{VARIANT}} a deep-research report for my AI Landscape app.
 
-Working folder: this project (ai-landscape-dash). Read AGENT.md first and follow
+Working folder: this project (ai-landscape-wiki). Read AGENT.md first and follow
 its DRR workflow and report style contract exactly.
 
 Subject: {{PLAYER_NAME}} ({{PLAYER_URL}})
