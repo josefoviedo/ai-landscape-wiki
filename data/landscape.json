@@ -2,7 +2,7 @@
   "schema": 1,
   "name": "AI Landscape",
   "description": "Interactive map of the AI tooling landscape: categories as systems, players in orbit.",
-  "updated": "2026-08-24T15:01:09Z",
+  "updated": "2026-08-24T15:19:43Z",
   "categories": [
     {
       "id": "foundation-models",
@@ -4351,6 +4351,25 @@
           }
         },
         {
+          "id": "deepseek-harness",
+          "name": "DeepSeek Harness",
+          "tagline": "DeepSeek's harness where everything is a plugin",
+          "pls": "DeepSeek's open-source coding-agent harness, launched August 2026 under the banner 'everything is a plugin': the interface, tool calls, agent loop, models, sandboxes, and orchestration are all composable plugins (built on its Cordis paradigm) you can toggle, replace, or write yourself. It inspects repos, edits files, runs shell commands, searches the web, plans, delegates to subagents, and enforces approval policies. MIT-licensed, it drew roughly 165,000 GitHub stars in its first week as an open rival to Claude Code.",
+          "url": "https://github.com/deepseek-ai/deepseek-harness",
+          "tags": [
+            "harness",
+            "open-source",
+            "coding",
+            "plugins"
+          ],
+          "prominence": 3,
+          "report": {
+            "status": "none",
+            "path": null,
+            "updated": null
+          }
+        },
+        {
           "id": "goose",
           "name": "Goose",
           "tagline": "Linux Foundation's vendor-neutral agent",
@@ -4398,6 +4417,25 @@
             "harness",
             "byok",
             "open-source"
+          ],
+          "prominence": 2,
+          "report": {
+            "status": "none",
+            "path": null,
+            "updated": null
+          }
+        },
+        {
+          "id": "paperclip",
+          "name": "Paperclip",
+          "tagline": "Open-source orchestration for zero-human companies",
+          "pls": "Not a harness itself but the layer above them: Paperclip is an open-source, self-hosted platform that runs fleets of agents as an org chart — roles, budgets, tickets, heartbeats, an immutable audit log, and hard budget caps that auto-pause at 100%. It drives the harnesses in this category (Claude, Codex, Hermes, OpenClaw, Pi, OpenCode, and more) as its 'employees.' From pseudonymous dev @dotta, MIT-licensed, it passed roughly 70,000 GitHub stars by mid-2026.",
+          "url": "https://github.com/agencyenterprise/paperclip-ai",
+          "tags": [
+            "orchestration",
+            "multi-agent",
+            "open-source",
+            "self-hosted"
           ],
           "prominence": 2,
           "report": {
