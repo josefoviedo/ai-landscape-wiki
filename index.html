@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AI Landscape</title>
+<title>AI Landscape Wiki</title>
 <style>
 /* ============================================================
    Design tokens (BUILD_SPEC §5) — dark default + light variant
@@ -371,7 +371,7 @@ g.hot:focus-visible .focus-ring{opacity:1}
 
 <header id="hdr">
   <div class="brand">
-    <h1>AI Landscape</h1>
+    <h1>AI Landscape Wiki</h1>
     <div class="sub" id="sub">loading…</div>
   </div>
   <span id="stats" class="tnum"></span>
@@ -1586,8 +1586,8 @@ function render(opts = {}){
   }
   renderPanel();
   renderViewer();
-  document.title = r.playerId ? `AI Landscape — ${idx.players.get(r.playerId).name}`
-    : r.catId ? `AI Landscape — ${idx.cats.get(r.catId).name}` : "AI Landscape";
+  document.title = r.playerId ? `AI Landscape Wiki — ${idx.players.get(r.playerId).name}`
+    : r.catId ? `AI Landscape Wiki — ${idx.cats.get(r.catId).name}` : "AI Landscape Wiki";
 }
 
 /* ==================================================================
