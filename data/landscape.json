@@ -2,7 +2,7 @@
   "schema": 1,
   "name": "AI Landscape",
   "description": "Interactive map of the AI tooling landscape: categories as systems, players in orbit.",
-  "updated": "2026-08-23T15:27:03Z",
+  "updated": "2026-08-24T15:01:09Z",
   "categories": [
     {
       "id": "foundation-models",
@@ -3728,7 +3728,7 @@
     {
       "id": "cli-interfaces",
       "name": "CLIs & Interfaces",
-      "pls": "Where you actually run AI: terminal-first tools — agent multiplexers, harnesses, and AI terminals — alongside the major desktop apps and editors. The flagship coding CLIs themselves (Claude Code, OpenAI Codex, OpenCode) live in Coding Agents; this system covers the layer around them: terminals that herd fleets of agents, bring-your-own-key harnesses, and the desktop workspaces from Anthropic, OpenAI, Microsoft, and JetBrains where agents meet the operating system.",
+      "pls": "Where you actually run AI: terminal-first tools — agent multiplexers and AI-native terminals — alongside the desktop apps and editors that have gone agent-first. The flagship coding CLIs live under Coding Agents and the model-agnostic runtimes under Model Harnesses; these are the terminals, launchers, editors, and desktops you drive them all from.",
       "players": [
         {
           "id": "warp",
@@ -3859,24 +3859,6 @@
           }
         },
         {
-          "id": "goose",
-          "name": "Goose",
-          "tagline": "Linux Foundation's vendor-neutral agent",
-          "pls": "Block's open-source agent went vendor-neutral in April 2026 when it was donated to the Linux Foundation's new Agentic AI Foundation. Goose runs in your terminal or as a desktop app, executes multi-step engineering tasks with any model provider behind it, and extends through MCP — a foundation-governed alternative to lab-owned CLIs.",
-          "url": "https://block.github.io/goose",
-          "tags": [
-            "cli",
-            "open-source",
-            "extensible"
-          ],
-          "prominence": 2,
-          "report": {
-            "status": "none",
-            "path": null,
-            "updated": null
-          }
-        },
-        {
           "id": "jetbrains-junie",
           "name": "JetBrains Junie",
           "tagline": "JetBrains' IDE-native coding agent",
@@ -3922,25 +3904,6 @@
             "terminal",
             "multiplexer",
             "rust",
-            "open-source"
-          ],
-          "prominence": 1,
-          "report": {
-            "status": "none",
-            "path": null,
-            "updated": null
-          }
-        },
-        {
-          "id": "pi",
-          "name": "Pi",
-          "tagline": "Hackable BYOK coding-agent harness",
-          "pls": "A minimal, reshapeable coding-agent harness from Mario Zechner, now at Earendil: four core tools (read, write, edit, bash), a TUI, and a unified LLM API spanning 15+ providers so the same agent loop runs on Claude, GPT, Gemini, or local models with your own keys. Lazy-loading skills keep prompts lean; TypeScript extensions rebuild the harness around your workflow.",
-          "url": "https://pi.dev",
-          "tags": [
-            "cli",
-            "harness",
-            "byok",
             "open-source"
           ],
           "prominence": 1,
@@ -4334,6 +4297,126 @@
             "protein-design",
             "crispr",
             "therapeutics"
+          ],
+          "prominence": 1,
+          "report": {
+            "status": "none",
+            "path": null,
+            "updated": null
+          }
+        }
+      ]
+    },
+    {
+      "id": "model-harnesses",
+      "name": "Model Harnesses",
+      "pls": "A harness is the runtime scaffold wrapped around a model — the agentic loop that calls the model, runs tools, manages memory and context, and keeps going until the job is done. Unlike IDE-bound coding agents or the SDKs you build with, these are ready-to-run, model-agnostic (bring-your-own-key) programs you host yourself. The flagship coding agents Claude Code and OpenAI Codex are themselves harnesses, but this map keeps them under Coding Agents by their primary identity; the tools here lead with the harness itself.",
+      "players": [
+        {
+          "id": "openclaw",
+          "name": "OpenClaw",
+          "tagline": "Viral open-source, messaging-first agent harness",
+          "pls": "The breakout open-source harness of 2026: run an autonomous agent you talk to from WhatsApp, Telegram, and 25+ channels, voice included. It shipped as Warelay, was renamed Clawdbot and then Moltbot (after an Anthropic trademark complaint) before settling on OpenClaw, and blew past 375,000 GitHub stars. Creator Steinberger joined OpenAI in February 2026 and a non-profit foundation now stewards it; under the hood it embeds Pi's SDK.",
+          "url": "https://openclaw.ai",
+          "tags": [
+            "harness",
+            "open-source",
+            "messaging",
+            "byok"
+          ],
+          "prominence": 3,
+          "report": {
+            "status": "none",
+            "path": null,
+            "updated": null
+          }
+        },
+        {
+          "id": "hermes-agent",
+          "name": "Hermes Agent",
+          "tagline": "The open-source harness that grows with you",
+          "pls": "Nous Research's open-source, model-agnostic harness — distinct from its Hermes LLM line that shares the name — turns any model into a long-running personal assistant. One gateway exposes the agent across Telegram, Discord, Slack, WhatsApp, and CLI at once, with persistent memory, lineage-based context compression, and skills it writes for itself from successful runs. The v0.9.0 'everywhere release' (April 2026) drove fast adoption; it bets on agents that compound knowledge over time.",
+          "url": "https://hermes-agent.nousresearch.com",
+          "tags": [
+            "harness",
+            "open-source",
+            "memory",
+            "byok"
+          ],
+          "prominence": 3,
+          "report": {
+            "status": "none",
+            "path": null,
+            "updated": null
+          }
+        },
+        {
+          "id": "goose",
+          "name": "Goose",
+          "tagline": "Linux Foundation's vendor-neutral agent",
+          "pls": "Block's open-source agent went vendor-neutral in April 2026 when it was donated to the Linux Foundation's new Agentic AI Foundation. Goose runs in your terminal or as a desktop app, executes multi-step engineering tasks with any model provider behind it, and extends through MCP — a foundation-governed alternative to lab-owned CLIs.",
+          "url": "https://block.github.io/goose",
+          "tags": [
+            "cli",
+            "open-source",
+            "extensible"
+          ],
+          "prominence": 2,
+          "report": {
+            "status": "none",
+            "path": null,
+            "updated": null
+          }
+        },
+        {
+          "id": "openhands",
+          "name": "OpenHands",
+          "tagline": "Open-source platform for self-hosted coding agents",
+          "pls": "Formerly OpenDevin, OpenHands is the MIT-licensed, open-source platform for running autonomous software-engineering agents — writing code, running tests, and opening pull requests inside sandboxed Docker environments. Bring-your-own-key and model-agnostic, it self-hosts with no vendor lock-in and scales from one local agent to fleets across an org. Past 80,000 GitHub stars and adopted by enterprises, it is the leading open alternative to closed agents like Devin.",
+          "url": "https://www.openhands.dev",
+          "tags": [
+            "harness",
+            "open-source",
+            "coding",
+            "byok"
+          ],
+          "prominence": 2,
+          "report": {
+            "status": "none",
+            "path": null,
+            "updated": null
+          }
+        },
+        {
+          "id": "pi",
+          "name": "Pi",
+          "tagline": "Hackable BYOK coding-agent harness",
+          "pls": "A minimal, reshapeable coding-agent harness from Mario Zechner, now at Earendil: four core tools (read, write, edit, bash), a TUI, and a unified LLM API spanning 15+ providers so the same agent loop runs on Claude, GPT, Gemini, or local models with your own keys. Lazy-loading skills keep prompts lean; TypeScript extensions rebuild the harness around your workflow.",
+          "url": "https://pi.dev",
+          "tags": [
+            "cli",
+            "harness",
+            "byok",
+            "open-source"
+          ],
+          "prominence": 2,
+          "report": {
+            "status": "none",
+            "path": null,
+            "updated": null
+          }
+        },
+        {
+          "id": "swe-agent",
+          "name": "SWE-agent",
+          "tagline": "Princeton's research harness for GitHub issues",
+          "pls": "The academic harness from the Princeton and Stanford team behind SWE-bench: SWE-agent takes a GitHub issue and fixes it with the language model of your choice, and is a standard research baseline (it also tackles cybersecurity and competitive-coding tasks). Its 100-line spin-off, mini-swe-agent — bash as the only tool — scores above 74% on SWE-bench Verified and is used by Meta, NVIDIA, and IBM as a benchmarking harness.",
+          "url": "https://github.com/SWE-agent/SWE-agent",
+          "tags": [
+            "harness",
+            "open-source",
+            "research",
+            "benchmark"
           ],
           "prominence": 1,
           "report": {
