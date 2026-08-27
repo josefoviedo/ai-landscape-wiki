@@ -19,6 +19,3 @@ Icon?
 
 # Node (not used today; guard against future tooling)
 node_modules/
-
-# Marketing / post screenshots (local-only drafts; not part of the shipped app)
-marketing/

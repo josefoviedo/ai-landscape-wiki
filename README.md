@@ -4,9 +4,19 @@ An interactive map of the AI tooling ecosystem. Categories are suns in a galaxy 
 
 Live: **https://ai-landscape-wiki.vercel.app**
 
+
+![AI Landscape Wiki galaxy view: twenty-one category suns labeled with player counts, spread across a dark starfield.](marketing/screenshots/galaxy-overview.jpg)
+
+*The galaxy view. Every category is a sun sized by how much lives in it; click one to drop into its orbit.*
+
 ## What's inside
 
 Right now the map covers **21 categories** and **242 players**, spanning foundation models, coding agents, model harnesses and orchestration, agent frameworks, vector databases, RAG, inference and serving, AI security, voice, media generation, and AI for life sciences, among others. A couple of players already ship a full deep-research report (Claude Science and Pi); the rest carry a short summary you can deepen on demand. All counts are computed live from `data/landscape.json`, so they grow as the data does rather than being pinned in this file.
+
+
+![Category orbit view for Model Harnesses and Orchestration, with a detail panel open for the Pi player showing its summary, tags, links, and report status.](marketing/screenshots/category-orbit.jpg)
+
+*Inside a category. Click a player to open its summary, tags, links, and (when ready) its report.*
 
 ## Run it locally
 
@@ -29,6 +39,11 @@ The app does not call any AI service itself. Depth is opt-in and runs through yo
 
 `AGENT.md` is the contract the agent follows for every update: the data schema, the report style, and the exact steps. `reports/claude-science.html` and `reports/pi.html` are worked examples of the house report style.
 
+
+![The in-app deep-research report for Pi, rendered in the report viewer with a kicker, numbered sections, and a TL;DR callout.](marketing/screenshots/report-viewer.jpg)
+
+*A finished deep-research report, opened right inside the app.*
+
 ## Keep the map tuned to your world (fork and update)
 
 This map is one curator's snapshot, and it is meant to be forked and kept current for the tools you actually care about. It is not meant to be re-pointed at a different field; it stays a map of AI tooling, tuned by you.
@@ -43,6 +58,7 @@ The built-in loop for that is the **search-miss queue**. When you search for a t
 | `data/landscape.json` | Every category, player, and report status. The app polls this file |
 | `reports/*.html` | Deep-research reports, one per player, self-contained |
 | `assets/logos/` | Player logos (favicon-grade), shown on the orbit nodes |
+| `marketing/screenshots/` | Screenshots used in this README and for posts |
 | `AGENT.md` | The contract your agent follows for reports and data updates |
 | `BUILD_SPEC.md` | How the app was originally built. Kept as design reference, not a setup step |
 | `run.command` / `run.sh` | Launchers: a local static server on port 8787 |
