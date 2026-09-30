@@ -170,6 +170,7 @@ g.hot:focus-visible .focus-ring{opacity:1}
 .lbl-pill{fill:var(--pill-bg);stroke:var(--ring);stroke-width:1}
 .lbl-name{fill:var(--ink);font-size:12.5px;font-weight:600}
 .lbl-name.sm{font-size:11.5px}
+.lbl-name.xs{font-size:10px}
 .lbl-sub{fill:var(--muted);font-size:10.5px;font-weight:500}
 .orbit-ring{fill:none;stroke:var(--ring);stroke-width:1;stroke-dasharray:3 7}
 @keyframes pulse{0%,100%{opacity:.95}50%{opacity:.25}}
@@ -747,20 +748,39 @@ function buildOrbit(catId){
   grad.appendChild(svgEl("stop", {offset:"100%", "stop-color":color, "stop-opacity":"0"}));
   defs.appendChild(grad); svg.appendChild(defs);
 
-  // ring radii: base fractions of the viewport, widened when a ring is crowded
+  // ring radii: base fractions of the viewport, widened when a ring is crowded.
+  // Categories past a crowding threshold get a 4th ring so labels don't collide.
   const maxR = Math.min(w, h)/2 - 64;
-  // ring 0 = inner (prominence 3) … ring 2 = outer (1); odd values land outside
-  const byRing = [[], [], []];
-  for (const pl of c.players) byRing[pl.prominence === 3 ? 0 : pl.prominence === 2 ? 1 : 2].push(pl);
-  // per-category node-size bump (jfo: Agent Memory reads better with slightly larger nodes)
+  const CROWDED = c.players.length > 18;
+  const NR = CROWDED ? 4 : 3;
+  const fracF = CROWDED ? [.34, .55, .76, .97] : [.42, .68, .94];
+  const capF  = CROWDED ? [.46, .66, .86, 1]   : [.58, .82, 1];
   const nodeBump = catId === "agent-memory" ? 3 : 0;
-  const nodeR = [22, 17, 13].map(v => v + nodeBump);
-  const caps = [.58, .82, 1].map(f => f*maxR);
-  const radii = [.42, .68, .94].map((f, ri) => {
+  const nodeR = (CROWDED ? [22, 18, 15, 12] : [22, 17, 13]).map(v => v + nodeBump);
+  // outer rings in crowded mode wear a slightly smaller label
+  const labelCls = CROWDED ? ["lbl-name sm","lbl-name sm","lbl-name xs","lbl-name xs"] : ["lbl-name sm","lbl-name sm","lbl-name sm"];
+  const labelSz  = CROWDED ? [11.5, 11.5, 10, 10] : [11.5, 11.5, 11.5];
+  // ring 0 = inner (most prominent). Normal: by prominence. Crowded: spread across
+  // 4 rings with inner rings holding proportionally fewer (they have less circumference).
+  const byRing = Array.from({length: NR}, () => []);
+  if (!CROWDED) {
+    for (const pl of c.players) byRing[pl.prominence === 3 ? 0 : pl.prominence === 2 ? 1 : 2].push(pl);
+  } else {
+    const ordered = [...c.players].sort((a, b) => b.prominence - a.prominence);
+    const wsum = fracF.reduce((s, x) => s + x, 0);
+    const raw = fracF.map(x => ordered.length * x / wsum);
+    const cnt = raw.map(Math.floor);
+    let rem = ordered.length - cnt.reduce((s, n) => s + n, 0);
+    raw.map((x, i) => [x - cnt[i], i]).sort((a, b) => b[0] - a[0]).forEach(pr => { if (rem-- > 0) cnt[pr[1]]++; });
+    let k = 0;
+    for (let ri = 0; ri < NR; ri++) for (let j = 0; j < cnt[ri]; j++) byRing[ri].push(ordered[k++]);
+  }
+  const caps = capF.map(f => f*maxR);
+  const radii = fracF.map((f, ri) => {
     const n = byRing[ri].length;
     const full = f*maxR;                                   // the ring's "at capacity" radius
     if (!n) return full;
-    const widest = Math.max(...byRing[ri].map(p => textW(p.name, 11.5, 600) + 20), 60);
+    const widest = Math.max(...byRing[ri].map(p => textW(p.name, labelSz[ri], 600) + 20), 60);
     const need = n * (widest + 26) / (2*Math.PI);          // circumference the labels need
     // Sparse rings (few nodes on a wide ring) read poorly, so pull them in a
     // LITTLE toward a fill-matched radius. fill = how much of the base ring the
@@ -771,21 +791,19 @@ function buildOrbit(catId){
     const scale = fill >= .5 ? 1 : 0.84 + 0.32*fill;       // continuous at fill=.5 → 1
     return clamp(Math.max(full*scale, need), 90, caps[ri]);
   });
-  radii[1] = clamp(Math.max(radii[1], radii[0]+58), 0, caps[1]);
-  radii[2] = clamp(Math.max(radii[2], radii[1]+58), 0, caps[2]);
+  for (let ri = 1; ri < NR; ri++) radii[ri] = clamp(Math.max(radii[ri], radii[ri-1]+58), 0, caps[ri]);
   // crowded rings: adjacent labels would touch → stagger alternate labels one
   // row lower (angular distribution stays even) and widen the ring gap a bit
   const stagger = radii.map((r, ri) => {
     const n = byRing[ri].length;
     if (n < 2) return false;
     const chord = 2 * r * Math.sin(Math.PI / n);
-    const widest = Math.max(...byRing[ri].map(p => textW(p.name, 11.5, 600) + 20));
+    const widest = Math.max(...byRing[ri].map(p => textW(p.name, labelSz[ri], 600) + 20));
     return chord < widest + 10;
   });
-  if (stagger[0]) radii[1] = clamp(Math.max(radii[1], radii[0]+76), 0, caps[1]);
-  if (stagger[1]) radii[2] = clamp(Math.max(radii[2], radii[1]+76), 0, caps[2]);
+  for (let ri = 1; ri < NR; ri++) if (stagger[ri-1]) radii[ri] = clamp(Math.max(radii[ri], radii[ri-1]+76), 0, caps[ri]);
 
-  for (let ri = 0; ri < 3; ri++)
+  for (let ri = 0; ri < NR; ri++)
     if (byRing[ri].length) svg.appendChild(svgEl("circle", {class:"orbit-ring", cx, cy, r:radii[ri]}));
 
   // central sun (click → category summary panel)
@@ -805,7 +823,8 @@ function buildOrbit(catId){
 
   // players
   const live = {catId, cx, cy, nodes:[]};
-  if (!orbitAngles.has(catId)) orbitAngles.set(catId, [0, 0, 0]);
+  if (!orbitAngles.has(catId)) orbitAngles.set(catId, Array(NR).fill(0));
+  else { const _a = orbitAngles.get(catId); while (_a.length < NR) _a.push(0); }
   byRing.forEach((players, ri) => {
     const phase = hash01(catId) * 2*Math.PI + ri * 2.1;    // deterministic per-ring phase
     players.forEach((p, i) => {
@@ -853,7 +872,7 @@ function buildOrbit(catId){
       g.appendChild(sc);
       g.appendChild(svgEl("circle", {class:"focus-ring", r:r+5}));
       const lift = stagger[ri] && i % 2 === 1 ? 16 : 0;   // alternate-row labels on crowded rings
-      addPill(g, [{text:p.name, cls:"lbl-name sm", size:11.5, weight:600}], r + 5 + lift);
+      addPill(g, [{text:p.name, cls:labelCls[ri], size:labelSz[ri], weight:600}], r + 5 + lift);
       svg.appendChild(g);
       live.nodes.push({el:g, ring:ri, base, r:radii[ri]});
     });
@@ -1478,7 +1497,7 @@ function drawStars(t, staticDraw = false){
 }
 
 /* ------------------------------ animation loop ------------------------------ */
-const RING_SPEED = [2*Math.PI/90, -2*Math.PI/120, 2*Math.PI/150];  // inner 90 s/rev, alternating
+const RING_SPEED = [2*Math.PI/90, -2*Math.PI/120, 2*Math.PI/150, -2*Math.PI/180];  // inner 90 s/rev, alternating; 4th only in crowded categories
 const GALAXY_SPEED = 2*Math.PI/210;   // one full galaxy revolution ≈ 3.5 min
 let lastT = performance.now();
 function tick(now){
@@ -1492,7 +1511,7 @@ function tick(now){
     const paused = (state.hoverPause && !panelUp) || state.focusPause;
     if (orbitLive && !paused){
       const angles = orbitAngles.get(orbitLive.catId);
-      for (let i = 0; i < 3; i++) angles[i] += RING_SPEED[i] * dt;
+      for (let i = 0; i < angles.length; i++) angles[i] += RING_SPEED[i] * dt;
       positionOrbit(orbitLive);
     }
     if (galaxyLive && galaxyLive.rotatable && !paused){

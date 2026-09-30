@@ -2,7 +2,7 @@
   "schema": 1,
   "name": "AI Landscape",
   "description": "Interactive map of the AI tooling landscape: categories as systems, players in orbit.",
-  "updated": "2026-09-30T15:25:01Z",
+  "updated": "2026-09-30T15:41:09Z",
   "categories": [
     {
       "id": "foundation-models",
@@ -3103,24 +3103,6 @@
           }
         },
         {
-          "id": "noma-security",
-          "name": "Noma Security",
-          "tagline": "End-to-end platform for AI agent security",
-          "pls": "Independent platform covering the full AI lifecycle: discovery of every model and agent (AI-SPM), supply-chain scanning, red-teaming, and runtime threat detection, pitched at Fortune 500 teams consolidating point tools. Noma raised a $100M Series B in 2025 — among the largest AI-security rounds ever — to chase the agent-security land grab.",
-          "url": "https://noma.security",
-          "tags": [
-            "ai-spm",
-            "runtime",
-            "agents"
-          ],
-          "prominence": 1,
-          "report": {
-            "status": "none",
-            "path": null,
-            "updated": null
-          }
-        },
-        {
           "id": "zenity",
           "name": "Zenity",
           "tagline": "Security and governance for AI agents",
@@ -3181,24 +3163,6 @@
           "tags": [
             "red-teaming",
             "research"
-          ],
-          "prominence": 1,
-          "report": {
-            "status": "none",
-            "path": null,
-            "updated": null
-          }
-        },
-        {
-          "id": "pillar-security",
-          "name": "Pillar Security",
-          "tagline": "Unified lifecycle security for AI agents",
-          "pls": "Israeli-founded startup unifying AI discovery, posture management, red-teaming, and runtime guardrails for what it calls the agentic workforce, and co-author of the SAIL framework for secure AI development. Named a 2026 Gartner Cool Vendor in AI Software Security and a representative vendor in Gartner's 2026 Guardian Agents market guide — a rising independent amid consolidation.",
-          "url": "https://www.pillar.security",
-          "tags": [
-            "agent-security",
-            "red-teaming",
-            "governance"
           ],
           "prominence": 1,
           "report": {
@@ -3296,25 +3260,6 @@
             "genai"
           ],
           "prominence": 2,
-          "report": {
-            "status": "none",
-            "path": null,
-            "updated": null
-          }
-        },
-        {
-          "id": "nemo-guardrails",
-          "name": "NeMo Guardrails (NVIDIA)",
-          "tagline": "NVIDIA's open-source guardrails toolkit",
-          "pls": "NeMo Guardrails is NVIDIA's open-source (Apache 2.0) toolkit for adding programmable guardrails to LLM and agent apps. Its Colang modeling language controls multi-turn dialogue flows rather than only filtering single inputs and outputs, with rails for topic control, content safety, and security plus prompt-injection checks. It plugs into OpenAI, Anthropic, Hugging Face, and NVIDIA NIM models and into LangChain and LangGraph pipelines.",
-          "url": "https://github.com/NVIDIA-NeMo/Guardrails",
-          "tags": [
-            "guardrails",
-            "open-source",
-            "llm",
-            "nvidia"
-          ],
-          "prominence": 1,
           "report": {
             "status": "none",
             "path": null,
