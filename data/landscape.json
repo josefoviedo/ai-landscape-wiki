@@ -2,7 +2,7 @@
   "schema": 1,
   "name": "AI Landscape",
   "description": "Interactive map of the AI tooling landscape: categories as systems, players in orbit.",
-  "updated": "2026-09-30T15:06:45Z",
+  "updated": "2026-09-30T15:25:01Z",
   "categories": [
     {
       "id": "foundation-models",
@@ -3061,7 +3061,7 @@
             "runtime",
             "enterprise"
           ],
-          "prominence": 2,
+          "prominence": 3,
           "report": {
             "status": "none",
             "path": null,
@@ -3113,7 +3113,7 @@
             "runtime",
             "agents"
           ],
-          "prominence": 2,
+          "prominence": 1,
           "report": {
             "status": "none",
             "path": null,
@@ -3130,7 +3130,7 @@
             "agent-security",
             "governance"
           ],
-          "prominence": 2,
+          "prominence": 1,
           "report": {
             "status": "none",
             "path": null,
@@ -3165,7 +3165,7 @@
             "open-source",
             "guardrails"
           ],
-          "prominence": 2,
+          "prominence": 1,
           "report": {
             "status": "none",
             "path": null,
@@ -3276,7 +3276,7 @@
             "agents",
             "genai"
           ],
-          "prominence": 2,
+          "prominence": 1,
           "report": {
             "status": "none",
             "path": null,
@@ -3314,7 +3314,7 @@
             "llm",
             "nvidia"
           ],
-          "prominence": 2,
+          "prominence": 1,
           "report": {
             "status": "none",
             "path": null,
@@ -3333,7 +3333,7 @@
             "guardrails",
             "devsecops"
           ],
-          "prominence": 2,
+          "prominence": 1,
           "report": {
             "status": "none",
             "path": null,
@@ -3352,7 +3352,7 @@
             "access",
             "mcp-security"
           ],
-          "prominence": 2,
+          "prominence": 3,
           "report": {
             "status": "none",
             "path": null,
@@ -3409,7 +3409,7 @@
             "access",
             "governance"
           ],
-          "prominence": 2,
+          "prominence": 3,
           "report": {
             "status": "none",
             "path": null,
