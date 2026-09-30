@@ -171,6 +171,7 @@ g.hot:focus-visible .focus-ring{opacity:1}
 .lbl-name{fill:var(--ink);font-size:12.5px;font-weight:600}
 .lbl-name.sm{font-size:11.5px}
 .lbl-name.xs{font-size:10px}
+.lbl-name.xxs{font-size:9.5px}
 .lbl-sub{fill:var(--muted);font-size:10.5px;font-weight:500}
 .orbit-ring{fill:none;stroke:var(--ring);stroke-width:1;stroke-dasharray:3 7}
 @keyframes pulse{0%,100%{opacity:.95}50%{opacity:.25}}
@@ -758,8 +759,8 @@ function buildOrbit(catId){
   const nodeBump = catId === "agent-memory" ? 3 : 0;
   const nodeR = (CROWDED ? [22, 18, 15, 12] : [22, 17, 13]).map(v => v + nodeBump);
   // outer rings in crowded mode wear a slightly smaller label
-  const labelCls = CROWDED ? ["lbl-name sm","lbl-name sm","lbl-name xs","lbl-name xs"] : ["lbl-name sm","lbl-name sm","lbl-name sm"];
-  const labelSz  = CROWDED ? [11.5, 11.5, 10, 10] : [11.5, 11.5, 11.5];
+  const labelCls = CROWDED ? ["lbl-name sm","lbl-name xs","lbl-name xs","lbl-name xxs"] : ["lbl-name sm","lbl-name sm","lbl-name sm"];
+  const labelSz  = CROWDED ? [11.5, 10, 10, 9.5] : [11.5, 11.5, 11.5];
   // ring 0 = inner (most prominent). Normal: by prominence. Crowded: spread across
   // 4 rings with inner rings holding proportionally fewer (they have less circumference).
   const byRing = Array.from({length: NR}, () => []);
