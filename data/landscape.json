@@ -2,7 +2,7 @@
   "schema": 1,
   "name": "AI Landscape",
   "description": "Interactive map of the AI tooling landscape: categories as systems, players in orbit.",
-  "updated": "2026-08-24T19:19:40Z",
+  "updated": "2026-09-30T15:06:45Z",
   "categories": [
     {
       "id": "foundation-models",
@@ -2995,7 +2995,7 @@
     {
       "id": "ai-security",
       "name": "AI Security",
-      "pls": "As companies wire LLMs and agents into real workflows, attackers target the AI itself: prompt injection, jailbreaks, poisoned models, data leakage, and hijacked agents holding real credentials. This layer supplies runtime guardrails, red-teaming, and posture management for AI fleets — research like EchoLeak, the zero-click Microsoft Copilot exploit, made the risk concrete. Mid-2026's defining dynamic is consolidation: Palo Alto (Protect AI), Check Point (Lakera), SentinelOne (Prompt Security), Cato (Aim), F5 (CalypsoAI), and Cisco (Robust Intelligence) all bought in, while independents like HiddenLayer, Noma, and Zenity race for the agent-security crown.",
+      "pls": "As companies wire LLMs and agents into real workflows, attackers target the AI itself: prompt injection, jailbreaks, poisoned models, data leakage, and hijacked agents holding real credentials. This layer supplies runtime guardrails, red-teaming, posture management, shadow-AI discovery, and agent governance. It spans two camps that increasingly overlap: AI-native specialists built for this threat, and the big cloud, endpoint, network, and identity platforms (Wiz, CrowdStrike, Zscaler, Okta) that now ship dedicated AI-security product lines. The through-line is securing the AI itself, not just the infrastructure around it.",
       "players": [
         {
           "id": "prisma-airs",
@@ -3201,6 +3201,215 @@
             "governance"
           ],
           "prominence": 1,
+          "report": {
+            "status": "none",
+            "path": null,
+            "updated": null
+          }
+        },
+        {
+          "id": "wiz-aispm",
+          "name": "Wiz AI-SPM",
+          "tagline": "AI-SPM in Wiz's agentless CNAPP",
+          "pls": "Wiz, the cloud-security platform now owned by Google, was first to fold AI Security Posture Management into a CNAPP. Its agentless security graph discovers AI services and SDKs across clouds (Bedrock, Azure OpenAI, Vertex AI, self-hosted models), flags exposed training data and misconfigured inference endpoints, and scores AI risk in the same graph as workloads and identities for unified cloud-plus-AI visibility.",
+          "url": "https://www.wiz.io/",
+          "tags": [
+            "ai-spm",
+            "cnapp",
+            "cloud",
+            "posture"
+          ],
+          "prominence": 3,
+          "report": {
+            "status": "none",
+            "path": null,
+            "updated": null
+          }
+        },
+        {
+          "id": "falcon-guardian",
+          "name": "Falcon Guardian (CrowdStrike)",
+          "tagline": "CrowdStrike's AIDR for autonomous agents",
+          "pls": "Launched at Fal.Con 2026, Falcon Guardian is CrowdStrike's AI Detection and Response layer on the Falcon platform. The Falcon sensor discovers known and shadow AI agents on Windows and macOS, keeps a live inventory of who deployed each and its status, then applies access controls, runtime detection, and policy enforcement to block unauthorized agent activity. It pairs with CrowdStrike's Continuous Identity for AI agents.",
+          "url": "https://www.crowdstrike.com/en-us/solutions/ai-agent-security/",
+          "tags": [
+            "aidr",
+            "agents",
+            "endpoint",
+            "runtime"
+          ],
+          "prominence": 3,
+          "report": {
+            "status": "none",
+            "path": null,
+            "updated": null
+          }
+        },
+        {
+          "id": "arthur-ai",
+          "name": "Arthur AI",
+          "tagline": "Arthur Shield: real-time firewall for LLMs",
+          "pls": "Arthur pivoted from ML monitoring into AI security and governance. Its Arthur Shield works as a real-time LLM firewall, catching prompt injection, PII leakage, hallucinations, and toxic content on both inputs and outputs, deployable as SaaS or on-prem. The 2026 platform adds multi-tenant governance, end-to-end guardrail rules you can test in a UI, and full agent observability across models and providers.",
+          "url": "https://www.arthur.ai/",
+          "tags": [
+            "llm-firewall",
+            "guardrails",
+            "governance",
+            "observability"
+          ],
+          "prominence": 2,
+          "report": {
+            "status": "none",
+            "path": null,
+            "updated": null
+          }
+        },
+        {
+          "id": "lasso-security",
+          "name": "Lasso Security",
+          "tagline": "Intent-based GenAI and MCP security",
+          "pls": "Lasso Security, an Israeli startup founded in 2023 with roughly $28M raised, secures generative-AI apps, chatbots, and agents. Its intent-based engine flags prompt injection and sensitive-data exposure in real time, and it ships an open-source MCP Gateway that inspects Model Context Protocol traffic for prompt and command injection and data leaks. The pitch is agent-native detection that keyword filters miss, at low latency.",
+          "url": "https://www.lasso.security/",
+          "tags": [
+            "mcp-security",
+            "prompt-injection",
+            "agents",
+            "genai"
+          ],
+          "prominence": 2,
+          "report": {
+            "status": "none",
+            "path": null,
+            "updated": null
+          }
+        },
+        {
+          "id": "nightfall",
+          "name": "Nightfall AI",
+          "tagline": "AI-native DLP for shadow AI",
+          "pls": "Nightfall is an AI-native data-loss-prevention platform built to stop sensitive data leaking into AI tools. It captures prompts, pastes, and uploads across ChatGPT, Copilot, Gemini, Claude, and 100+ GenAI apps, then classifies and blocks PII, secrets, and source code with its own detection models before data leaves. Coverage spans SaaS, endpoints, email, and browsers, with a shadow-AI discovery and agentic-DLP story.",
+          "url": "https://www.nightfall.ai/",
+          "tags": [
+            "dlp",
+            "data-security",
+            "shadow-ai",
+            "genai"
+          ],
+          "prominence": 2,
+          "report": {
+            "status": "none",
+            "path": null,
+            "updated": null
+          }
+        },
+        {
+          "id": "nemo-guardrails",
+          "name": "NeMo Guardrails (NVIDIA)",
+          "tagline": "NVIDIA's open-source guardrails toolkit",
+          "pls": "NeMo Guardrails is NVIDIA's open-source (Apache 2.0) toolkit for adding programmable guardrails to LLM and agent apps. Its Colang modeling language controls multi-turn dialogue flows rather than only filtering single inputs and outputs, with rails for topic control, content safety, and security plus prompt-injection checks. It plugs into OpenAI, Anthropic, Hugging Face, and NVIDIA NIM models and into LangChain and LangGraph pipelines.",
+          "url": "https://github.com/NVIDIA-NeMo/Guardrails",
+          "tags": [
+            "guardrails",
+            "open-source",
+            "llm",
+            "nvidia"
+          ],
+          "prominence": 2,
+          "report": {
+            "status": "none",
+            "path": null,
+            "updated": null
+          }
+        },
+        {
+          "id": "invariant-snyk",
+          "name": "Invariant (Snyk)",
+          "tagline": "Agentic AI and MCP security, Snyk-owned",
+          "pls": "Invariant Labs, an ETH Zurich spin-out, joined Snyk's AI Trust Platform in a 2025 acquisition. It contributes a transparent guardrails layer at the LLM and agent level plus research on agentic attack vectors: MCP vulnerabilities, tool poisoning, and runtime detection. Teams inspect agent behavior, enforce contextual rules, and scan MCP servers, folding agent security into Snyk's broader DevSecOps and AI-security platform.",
+          "url": "https://snyk.io/",
+          "tags": [
+            "mcp-security",
+            "agents",
+            "guardrails",
+            "devsecops"
+          ],
+          "prominence": 2,
+          "report": {
+            "status": "none",
+            "path": null,
+            "updated": null
+          }
+        },
+        {
+          "id": "zscaler-ai",
+          "name": "Zscaler Security for AI",
+          "tagline": "Zscaler's zero-trust security for AI",
+          "pls": "Zscaler extends its zero-trust cloud into securing enterprise AI use. Security for AI discovers AI apps, models, and agents, governs access with zero-trust controls, and enforces inline DLP over AI interactions across 250+ GenAI apps to stop prompt data leakage. Its 2026 additions include prompt extraction with conversation views, AI red-teaming for MCP servers, a standalone prompt-hardening service, and intent-based multi-turn guardrails.",
+          "url": "https://www.zscaler.com/products-and-solutions/ai-access-security",
+          "tags": [
+            "dlp",
+            "zero-trust",
+            "access",
+            "mcp-security"
+          ],
+          "prominence": 2,
+          "report": {
+            "status": "none",
+            "path": null,
+            "updated": null
+          }
+        },
+        {
+          "id": "obsidian-security",
+          "name": "Obsidian Security",
+          "tagline": "Shadow-AI and agent governance for SaaS",
+          "pls": "Obsidian secures AI where it meets SaaS and identity. It discovers shadow AI and shadow MCP servers through browser, API, and agent monitoring, then governs agent behavior at runtime, blocking privilege escalation and excessive data access for agents built on Copilot, Bedrock, Vertex, OpenAI, and Claude. Backed by an $85M Series D, it ties agent actions to OAuth, sessions, permissions, and data context.",
+          "url": "https://www.obsidiansecurity.com/",
+          "tags": [
+            "shadow-ai",
+            "agent-governance",
+            "mcp-security",
+            "saas"
+          ],
+          "prominence": 2,
+          "report": {
+            "status": "none",
+            "path": null,
+            "updated": null
+          }
+        },
+        {
+          "id": "orca-security",
+          "name": "Orca Security",
+          "tagline": "Agentless AI-SPM in the Orca CNAPP",
+          "pls": "Orca Security (the cloud-security company, distinct from Stably's Orca agent runtime in Model Harnesses) delivers AI-SPM inside its agentless CNAPP. Its SideScanning reads workloads, cloud configuration, and AI resources from one read-only connection, covering 50+ models and packages, and ties each AI misconfiguration to the exposed workload, the identity that can reach it, and the sensitive data behind it across AWS, Azure, and GCP.",
+          "url": "https://orca.security/platform/ai-security/ai-spm/",
+          "tags": [
+            "ai-spm",
+            "cnapp",
+            "cloud",
+            "agentless"
+          ],
+          "prominence": 2,
+          "report": {
+            "status": "none",
+            "path": null,
+            "updated": null
+          }
+        },
+        {
+          "id": "okta-ai-agents",
+          "name": "Okta for AI Agents",
+          "tagline": "Okta's first-class identity for agents",
+          "pls": "Identity leader Okta is extending IAM to autonomous agents. Okta for AI Agents treats each agent as a first-class identity: Agent SSO built on the open Cross App Access standard (GA in 2026), shadow AI-agent discovery, and an Agent Gateway, with Auth for GenAI (via Auth0) giving developers token management and secure patterns for LangChain, LlamaIndex, and the Vercel AI SDK. Governance shifts from access to agent execution.",
+          "url": "https://www.okta.com/",
+          "tags": [
+            "agent-identity",
+            "iam",
+            "access",
+            "governance"
+          ],
+          "prominence": 2,
           "report": {
             "status": "none",
             "path": null,
